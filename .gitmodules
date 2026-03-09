@@ -1,0 +1,6 @@
+[submodule "PlanViz"]
+	path = PlanViz
+	url = https://github.com/MAPF-Competition/PlanViz
+[submodule "Start-Kit"]
+	path = Start-Kit
+	url = https://github.com/MAPF-Competition/Start-Kit

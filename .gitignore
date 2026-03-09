@@ -1,0 +1,5 @@
+OUTPUT/
+venv/
+__pycache__/
+*.pyc
+fr-venv/
