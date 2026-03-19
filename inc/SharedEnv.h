@@ -4,6 +4,8 @@
 #include "nlohmann/json.hpp"
 #include "Tasks.h"
 #include <unordered_map>
+#include "Types.h"
+
 
 
 typedef std::chrono::steady_clock::time_point TimePoint;
@@ -20,9 +22,21 @@ public:
     std::vector<int> map;
     std::string file_storage_path;
 
+    // Modifikasi
+    // ------------------------------
+    CustomAlgo::HPA_H hpa_h;
+    CustomAlgo::Neighbors ns; // Untuk penggunaan yang berulang
+    std::vector<int> degree_map;
+    std::vector<int> offsets; 
+    int k;  //Number of cluster
+    int c_penalty;  //Penalty constant for going against highway
+    int r; //radius
+    // ------------------------------
+
+
     // goal locations for each agent
     // each task is a pair of <goal_loc, reveal_time>
-    vector< vector<pair<int, int> > > goal_locations;
+    std::vector<std::vector<pair<int, int> > > goal_locations;
 
     int curr_timestep = 0;
     vector<State> curr_states;
