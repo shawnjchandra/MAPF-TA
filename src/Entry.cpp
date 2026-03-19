@@ -9,8 +9,10 @@
 // This is an offline step, after it completes then evaluation begins.
 void Entry::initialize(int preprocess_time_limit)
 {
+    // env->ns = CustomAlgo::init_neighbor(env);  
     scheduler->initialize(preprocess_time_limit);
     planner->initialize(preprocess_time_limit);
+
 }
 
 //The compute function will be called by competition system on each timestep.
