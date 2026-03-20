@@ -25,10 +25,15 @@ ENDIF()
 
 include_directories("inc")
 
-# default planner
-include_directories("default_planner")
+# default planner -> custom_algo
+include_directories("custom_algo")
 
-file(GLOB SOURCES "src/*.cpp" "default_planner/*.cpp")
+file(GLOB SOURCES "src/*.cpp" 
+                    "custom_algo/*.cpp" 
+                    "custom_algo/preprocessing/*.cpp"
+                    "custom_algo/planner/*.cpp"
+                    "custom_algo/scheduler/*.cpp"
+                    )
 
 
 # Find Boost
