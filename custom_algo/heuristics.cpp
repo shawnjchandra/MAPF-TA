@@ -36,7 +36,16 @@ namespace CustomAlgo{
         int src_local = env->hpa_h.global_to_local[src];
         int dest_local = env->hpa_h.global_to_local[dest];
 
-        if (c_src == c_dest) return env->hpa_h.IntraHT[c_src][dest_local][src_local][src_orient];
+        if (c_src == c_dest) {
+            
+            if (env->hpa_h.IntraHT[c_src].find(dest_local) == env->hpa_h.IntraHT[c_src].end()) {
+                auto ht = CustomAlgo::build_IntraHT(env,c_src,dest);
+                env->hpa_h.IntraHT[c_src][dest_local] = std::vector<std::array<int,4>>(ht.begin(), ht.end());
+            }
+
+            return env->hpa_h.IntraHT[c_src][dest_local][src_local][src_orient]
+
+        };
 
         int best = INTERVAL_MAX;
 

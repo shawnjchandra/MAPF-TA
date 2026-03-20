@@ -123,7 +123,7 @@ namespace CustomAlgo{
 
 	struct HPA_H {
 		AbstractGraph AG;
-		std::vector<std::vector<std::vector<std::array<int,4>>>> IntraHT; //Cluster, Destination Local, Source Local, Orientation
+		std::vector<std::map<int, std::vector<std::array<int,4>>>> IntraHT; //Cluster, Destination Local, Source Local, Orientation
 		std::vector<std::vector<int>> InterHT;
 		std::vector<std::vector<int>> Gates;
 		std::vector<Entrances> Ents;
