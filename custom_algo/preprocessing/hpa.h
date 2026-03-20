@@ -6,6 +6,7 @@
 #include "utils.h"
 #include "highway.h"
 #include "SharedEnv.h"
+#include <omp.h>
 
 namespace CustomAlgo{
     

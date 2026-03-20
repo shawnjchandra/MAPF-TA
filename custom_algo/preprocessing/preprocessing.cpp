@@ -2,6 +2,8 @@
 #include <chrono>
 
 void Preprocessing::initialize(int preprocess_time_limit){
+    std::cerr << "INIT CALLED" << std::endl;
+
     auto _t0 = std::chrono::high_resolution_clock::now();
 
     std::vector<int> degree_map;
@@ -35,14 +37,17 @@ void Preprocessing::initialize(int preprocess_time_limit){
     auto _t3 = std::chrono::high_resolution_clock::now();
     long total_ms = std::chrono::duration_cast<std::chrono::milliseconds>(_t3 - _t0).count();
 
-    std::cout << "[PREPROCESS] total_ms="      << total_ms                          << std::endl;
-    std::cout << "[PREPROCESS] voronoi_ms="    << voronoi_ms                        << std::endl;
-    std::cout << "[PREPROCESS] hpa_ms="        << hpa_ms                            << std::endl;
-    std::cout << "[PREPROCESS] clusters="      << env->k                            << std::endl;
-    std::cout << "[PREPROCESS] gates="         << env->hpa_h.AG.gates.size()        << std::endl;
-    std::cout << "[PREPROCESS] entrances="     << env->hpa_h.Ents.size()            << std::endl;
-    std::cout << "[PREPROCESS] highway_edges=" << env->hpa_h.hw.e_hw.size()         << std::endl;
-    std::cout << "[PREPROCESS] n_cells="       << env->map.size()                   << std::endl;
 
+
+    std::cerr << "[PREPROCESS] total_ms="      << total_ms                          << std::endl;
+    std::cerr << "[PREPROCESS] voronoi_ms="    << voronoi_ms                        << std::endl;
+    std::cerr << "[PREPROCESS] hpa_ms="        << hpa_ms                            << std::endl;
+    std::cerr << "[PREPROCESS] clusters="      << env->k                            << std::endl;
+    std::cerr << "[PREPROCESS] gates="         << env->hpa_h.AG.gates.size()        << std::endl;
+    std::cerr << "[PREPROCESS] entrances="     << env->hpa_h.Ents.size()            << std::endl;
+    std::cerr << "[PREPROCESS] highway_edges=" << env->hpa_h.hw.e_hw.size()         << std::endl;
+    std::cerr << "[PREPROCESS] n_cells="       << env->map.size()                   << std::endl;
+
+    
 
 }

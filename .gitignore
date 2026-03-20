@@ -8,3 +8,8 @@ test.txt
 python/tmp
 python/__pycache__
 output.json
+
+# For testing purposes
+preprocessing_*
+visualizer_*
+test_*.py

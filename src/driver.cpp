@@ -54,8 +54,8 @@ int main(int argc, char **argv)
         ("logFile,l", po::value<std::string>()->default_value(""), "redirect stdout messages into the specified log file")
         ("logDetailLevel,d", po::value<int>()->default_value(1), "the minimum severity level of log messages to display, 1--showing all the messages, 2--showing warnings and fatal errors, 3--showing fatal errors only")
         // Modifikasi tambahan
-        ("numberOfCluster,k", po::value<int>()->default_value(10), "the number of cluster used in the voronoi map generation");
-        ("radius,r", po::value<int>()->default_value(5), "the number of cluster used in the voronoi map generation");
+        ("numberOfCluster,k", po::value<int>()->default_value(10), "the number of cluster used in the voronoi map generation")
+        ("radius,r", po::value<int>()->default_value(5), "the number of cluster used in the voronoi map generation")
         ("cPenalty", po::value<int>()->default_value(2), "the number of cluster used in the voronoi map generation");
     clock_t start_time = clock();
     po::store(po::parse_command_line(argc, argv, desc), vm);

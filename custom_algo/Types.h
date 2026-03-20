@@ -1,5 +1,6 @@
 #pragma once
-#include <limits.h>
+#include <limits>
+#include <climits>
 
 
 #include <vector>
@@ -75,6 +76,16 @@ namespace CustomAlgo{
 				n.idx = idx;
 				return n;
 			}
+
+			bool operator<(const HNode& other) const {
+				return value < other.value;
+			}
+
+			// And this (priority queue needs greater-than too):
+			bool operator>(const HNode& other) const {
+				return value > other.value;
+			}
+
 			// the following is used to compare nodes in the OPEN list
 			struct compare_node
 			{

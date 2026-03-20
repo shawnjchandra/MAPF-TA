@@ -7,7 +7,7 @@ namespace CustomAlgo{
         selected.resize(env->map.size());
         
         std::vector<int> interest_points;
-        interest_points.resize(env->k);
+        interest_points.reserve(env->k);
 
         int p;
         do {
@@ -22,7 +22,7 @@ namespace CustomAlgo{
             int selected_idx = -1;
             
             for(int j = 0 ; j < env->map.size() ; j ++) {
-                if (!selected[j] || env->map[j] == 1) {
+                if (!selected[j] && env->map[j] == 0) {
                     int min_dist = INTERVAL_MAX;
 
                     for (p = 0 ; p < interest_points.size() ; p++) {

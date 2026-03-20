@@ -2,6 +2,7 @@
 
 #include "Types.h"
 #include "SharedEnv.h"
+#include "../utils.h"
 
 namespace CustomAlgo{
     std::vector<int> maximin_sampling(SharedEnvironment* env);

@@ -7,6 +7,7 @@ namespace CustomAlgo{
 
         std::map<std::pair<int,int>,std::pair<int,int>> e_hw;
         std::map<std::pair<int,int>,std::pair<int,int>> r_e_hw;
+
         for (int c_i = 0 ; c_i < centroids.size() ; c_i++) {
             for (int c_j = 0 ; c_j < centroids.size() ; c_j++) {
                 if (c_i  == c_j) continue;
@@ -56,7 +57,7 @@ namespace CustomAlgo{
         path.push_back({current, best_orientation});
         while (current != goal )
         {
-            best_next = INTERVAL_MAX;
+            best_next = -1;
             best_cost = INTERVAL_MAX;
             best_next_orient = -1;
             
@@ -64,9 +65,8 @@ namespace CustomAlgo{
             for (int neigh : Neighbors) {
                 if (env->map[neigh] == 1) continue;
                 
-                best = INTERVAL_MAX;
                 for (int next_orient = 0 ; next_orient < 4 ; next_orient++) {
-                    best = query_heuristic(env, neigh, next_orient, goal);
+                    int best = query_heuristic(env, neigh, next_orient, goal);
                     if (best < best_cost) {
                         best_cost = best;
                         best_next = neigh;
@@ -76,6 +76,7 @@ namespace CustomAlgo{
             }
 
             path.push_back({best_next, best_next_orient});
+            current = best_next;
         }
         return path;
     }
