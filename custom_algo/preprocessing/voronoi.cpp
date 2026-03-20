@@ -1,9 +1,6 @@
-#include "../Types.h"
-
-#include "utils.h"
+#include "voronoi.h"
 
 namespace CustomAlgo{
-
 
     std::vector<int> maximin_sampling(SharedEnvironment* env) {
         std::vector<bool> selected;
@@ -60,7 +57,7 @@ namespace CustomAlgo{
                     int label = -1;
 
                     for (int k = 0; k < centroids.size(); k++) {
-                        int dist = manhattanDistance(row * env->cols + col, centroids[k], env);
+                        int dist = CustomAlgo::manhattanDistance(row * env->cols + col, centroids[k], env);
 
                         if (dist < min_dist) {
                             min_dist = dist;

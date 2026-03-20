@@ -13,4 +13,4 @@ public:
     Preprocessing(SharedEnvironment* env):env(env){};
     Preprocessing(){env = new SharedEnvironment();};
     virtual void initialize(int preprocess_time_limit);
-}
+};

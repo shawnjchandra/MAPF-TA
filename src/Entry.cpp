@@ -3,6 +3,7 @@
 #include "utils.h"
 #include "heuristics.h"
 
+
 // The initialize function will be called by competition system at the preprocessing stage.
 // Implement the initialize functions of the planner and scheduler to load or compute auxiliary data.
 // Note that, this function runs untill preprocess_time_limit (in milliseconds) is reached.
@@ -10,8 +11,9 @@
 void Entry::initialize(int preprocess_time_limit)
 {
     // env->ns = CustomAlgo::init_neighbor(env);  
-    scheduler->initialize(preprocess_time_limit);
-    planner->initialize(preprocess_time_limit);
+    Preprocessing::initialize(preprocess_time_limit);
+    // scheduler->initialize(preprocess_time_limit);
+    // planner->initialize(preprocess_time_limit);
 
 }
 

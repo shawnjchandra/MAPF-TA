@@ -2,7 +2,6 @@
 
 namespace CustomAlgo{
     
-
     bool validateMove(int loc, int loc2, const SharedEnvironment* env){
         int loc_row = loc/env->cols;
         int loc_col = loc%env->cols;

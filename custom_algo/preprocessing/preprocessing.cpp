@@ -6,7 +6,7 @@ void Preprocessing::initialize(int preprocess_time_limit){
 
     //Fase 1 : Subgraf + voronoi 
     std::vector<int> centroids = CustomAlgo::maximin_sampling(env);
-    CustomAlgo::voronoi_generation(env);
+    CustomAlgo::voronoi_generation(env,centroids);
 
     // Fase 2+3 : heuristic map + highway;
     CustomAlgo::generate_HPAHMap(env, centroids);
