@@ -1,8 +1,6 @@
 #pragma once
 
-
-#include "../Types.h"
-
+#include "Types.h"
 #include "SharedEnv.h"
 
 namespace CustomAlgo{

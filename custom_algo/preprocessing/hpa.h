@@ -1,7 +1,10 @@
 #pragma once
 
 #include <queue>
+#include <set>
 #include "Types.h"
+#include "utils.h"
+#include "highway.h"
 #include "SharedEnv.h"
 
 namespace CustomAlgo{

@@ -53,7 +53,7 @@ int main(int argc, char **argv)
         ("preprocessTimeLimit,p", po::value<int>()->default_value(30000), "the time limit for preprocessing in milliseconds")
         ("logFile,l", po::value<std::string>()->default_value(""), "redirect stdout messages into the specified log file")
         ("logDetailLevel,d", po::value<int>()->default_value(1), "the minimum severity level of log messages to display, 1--showing all the messages, 2--showing warnings and fatal errors, 3--showing fatal errors only")
-        
+        // Modifikasi tambahan
         ("numberOfCluster,k", po::value<int>()->default_value(10), "the number of cluster used in the voronoi map generation");
         ("radius,r", po::value<int>()->default_value(5), "the number of cluster used in the voronoi map generation");
         ("cPenalty", po::value<int>()->default_value(2), "the number of cluster used in the voronoi map generation");
@@ -67,6 +67,8 @@ int main(int argc, char **argv)
     }
 
     po::notify(vm);
+
+    
 
     boost::filesystem::path p(vm["inputFile"].as<std::string>());
     boost::filesystem::path dir = p.parent_path();
@@ -103,6 +105,15 @@ int main(int argc, char **argv)
         planner = new Entry();
 #endif
 #endif
+
+
+    if (planner == nullptr) {
+        planner = new Entry();
+    }
+    // Modifikasi
+    planner->env->k         = vm["numberOfCluster"].as<int>();
+    planner->env->r         = vm["radius"].as<int>();
+    planner->env->c_penalty = vm["cPenalty"].as<int>();
 
     auto input_json_file = vm["inputFile"].as<std::string>();
     json data;

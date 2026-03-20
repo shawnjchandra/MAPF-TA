@@ -1,9 +1,5 @@
 #include "hpa.h"
 
-#include "utils.h"
-#include "highway.h"
-#include <set>
-
 namespace CustomAlgo{
     void cluster_indexing(SharedEnvironment* env) {    
         for(int loc = 0; loc < env->map.size() ; loc++){

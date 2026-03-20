@@ -1,6 +1,4 @@
 #include "highway.h"
-#include "heuristics.h"
-#include "utils.h"
 
 namespace CustomAlgo{
     void generateHighways(SharedEnvironment* env,  std::vector<int> centroids) {

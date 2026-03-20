@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Types.h"
+#include "heuristics.h"
+#include "utils.h"
 #include <utility>
 
 namespace CustomAlgo{
