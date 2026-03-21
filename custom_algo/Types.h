@@ -133,6 +133,8 @@ namespace CustomAlgo{
 		std::vector<int> voronoi_map;
 		Highways hw;
 
+		std::map<int, std::vector<int>> inter_cache;
+
 		HPA_H() = default;
 	};
 

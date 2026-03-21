@@ -219,13 +219,13 @@ namespace CustomAlgo{
             int cluster_size = env->hpa_h.local_to_global[c].size();
             int num_gates = env->hpa_h.Gates[c].size();
 
-            env->hpa_h.IntraHT[c].assign(
-                cluster_size,
-                std::vector<std::array<int,4>>(
-                    cluster_size,
-                    {INTERVAL_MAX, INTERVAL_MAX, INTERVAL_MAX, INTERVAL_MAX}
-                )
-            );
+            // env->hpa_h.IntraHT[c].assign(
+            //     cluster_size,
+            //     std::vector<std::array<int,4>>(
+            //         cluster_size,
+            //         {INTERVAL_MAX, INTERVAL_MAX, INTERVAL_MAX, INTERVAL_MAX}
+            //     )
+            // );
 
             std::cerr << "  [BAG] cluster=" << c 
                     << " size=" << cluster_size 
@@ -240,6 +240,7 @@ namespace CustomAlgo{
                 ht = build_IntraHT(env, c, dest);
 
                 env->hpa_h.IntraHT[c][dest_local] = std::vector<std::array<int,4>>(ht.begin(), ht.end());
+
                 // intra_ht_ms += elapsed(t_ht);
 
                 // // Check dest_local is valid
@@ -359,98 +360,66 @@ namespace CustomAlgo{
                 std::chrono::high_resolution_clock::now() - t).count();
         };
 
-        std::vector<int> dist;
-        std::vector<int> gates_index;
-        priority_queue<HNode> pq;
-        int i, w;
+        int gates_size = env->hpa_h.AG.gates.size();
 
-        auto t0 = std::chrono::high_resolution_clock::now();
-        gates_index.resize(env->map.size());
-        env->hpa_h.gate_index.resize(env->map.size(), INTERVAL_MAX);
-
-        // int gates_size = env->hpa_h.AG.gates.size();
-        // for (i = 0; i < gates_size; i++)
-        //     gates_index[env->hpa_h.AG.gates[i]] = i;
-
-        if (env->hpa_h.gate_index.empty() || 
+        // Build gate_index only on first call
+        if (env->hpa_h.gate_index.empty() ||
             env->hpa_h.gate_index[env->hpa_h.AG.gates[0]] == INTERVAL_MAX) {
             env->hpa_h.gate_index.assign(env->map.size(), INTERVAL_MAX);
-            int gates_size = env->hpa_h.AG.gates.size();
             for (int i = 0; i < gates_size; i++)
                 env->hpa_h.gate_index[env->hpa_h.AG.gates[i]] = i;
+            std::cerr << "  [IHT] gate_index built" << std::endl;
+        } else {
+            std::cerr << "  [IHT] gate_index reused" << std::endl;
         }
 
-        // Always clear cache since highways changed costs
+        // Always clear cache since highway costs may have changed
         env->hpa_h.inter_cache.clear();
-        env->hpa_h.InterHT.clear();
-        env->hpa_h.InterHT.resize(
-            env->hpa_h.AG.gates.size(),
-            std::vector<int>(env->hpa_h.AG.gates.size(), INTERVAL_MAX)
-        );
 
-        env->hpa_h.InterHT.clear();
-        env->hpa_h.InterHT.resize(gates_size, std::vector<int>(gates_size, INTERVAL_MAX));
-        std::cerr << "  [IHT] init: " << elapsed(t0) << "ms"
-                << "  gates_size=" << gates_size << std::endl;
-
-        long dijkstra_ms = 0;
-        long neighbor_ms = 0;
-
-        for (i = 0; i < gates_size; i++) {
-            auto t_dijk = std::chrono::high_resolution_clock::now();
-
-            int g_src = env->hpa_h.AG.gates[i];
-            dist.assign(gates_size, INTERVAL_MAX);
-            dist[i] = 0;
-
-            pq = priority_queue<HNode>();
-            pq.push(HNode::createForInterHT(0, i));
-
-            while (!pq.empty()) {
-                HNode curr = pq.top();
-                pq.pop();
-                int d = curr.value;
-                int u = curr.idx;
-
-                if (d > dist[u]) continue;
-
-                int u_loc = env->hpa_h.AG.gates[u];
-
-                auto t_neigh = std::chrono::high_resolution_clock::now();
-                for (int v_loc : env->hpa_h.AG.neighbors[u_loc]) {
-                    if (env->hpa_h.AG.inter.find({u_loc, v_loc}) != env->hpa_h.AG.inter.end()) {
-                        w = env->hpa_h.AG.inter[{u_loc, v_loc}];
-                        int orient = getOrientationBetween(u_loc, v_loc);
-                        if (env->hpa_h.hw.r_e_hw.count({u_loc, orient})) w = env->c_penalty;
-                    } else {
-                        w = env->hpa_h.AG.intra[{u_loc, v_loc}];
-                    }
-
-                    int v = gates_index[v_loc];
-                    int neighDist = dist[u] + w;
-                    if (neighDist < dist[v]) {
-                        dist[v] = neighDist;
-                        pq.push(HNode::createForInterHT(neighDist, v));
-                    }
-                }
-                neighbor_ms += elapsed(t_neigh);
-            }
-
-            dijkstra_ms += elapsed(t_dijk);
-            env->hpa_h.InterHT[i] = dist;
-
-            // Progress every 50 gates
-            if (i % 50 == 0)
-                std::cerr << "  [IHT] gate " << i << "/" << gates_size
-                        << "  cumulative=" << dijkstra_ms << "ms" << std::endl;
-        }
-
-        env->hpa_h.gate_index = gates_index;
-
-        std::cerr << "  [IHT] dijkstra_total=" << dijkstra_ms << "ms"
-                << "  neighbor_lookups=" << neighbor_ms << "ms"
+        std::cerr << "  [IHT] lazy mode, gates=" << gates_size
                 << "  TOTAL=" << elapsed(t_start) << "ms" << std::endl;
     }
+
+    void compute_inter_from(SharedEnvironment* env, int gate_idx) {
+    int gates_size = env->hpa_h.AG.gates.size();
+    std::vector<int> dist(gates_size, INTERVAL_MAX);
+    dist[gate_idx] = 0;
+
+    std::priority_queue<HNode> pq;
+    pq.push(HNode::createForInterHT(0, gate_idx));
+
+    while (!pq.empty()) {
+        HNode curr = pq.top();
+        pq.pop();
+        int d = curr.value;
+        int u = curr.idx;
+
+        if (d > dist[u]) continue;
+
+        int u_loc = env->hpa_h.AG.gates[u];
+        for (int v_loc : env->hpa_h.AG.neighbors[u_loc]) {
+            int w;
+            if (env->hpa_h.AG.inter.count({u_loc, v_loc})) {
+                w = env->hpa_h.AG.inter[{u_loc, v_loc}];
+                int orient = getOrientationBetween(u_loc, v_loc);
+                if (env->hpa_h.hw.r_e_hw.count({u_loc, orient}))
+                    w = env->c_penalty;
+            } else {
+                w = env->hpa_h.AG.intra[{u_loc, v_loc}];
+            }
+
+            int v = env->hpa_h.gate_index[v_loc];
+            if (v == INTERVAL_MAX) continue;
+            int nd = dist[u] + w;
+            if (nd < dist[v]) {
+                dist[v] = nd;
+                pq.push(HNode::createForInterHT(nd, v));
+            }
+        }
+    }
+    
+    env->hpa_h.inter_cache[gate_idx] = dist;
+}
 
 
 void dumpPreprocessingData(SharedEnvironment* env) {
@@ -565,18 +534,23 @@ void dumpPreprocessingData(SharedEnvironment* env) {
         
         int gates_size = env->hpa_h.AG.gates.size();
         std::cerr << "gates_size=" << gates_size << std::endl;
-        std::cerr << "InterHT size=" << env->hpa_h.InterHT.size() << std::endl;
+        std::cerr << "gate_index built=" << !env->hpa_h.gate_index.empty() << std::endl;
+        std::cerr << "inter_cache size=" << env->hpa_h.inter_cache.size() 
+                << " (lazy, 0 is expected)" << std::endl;
+
         if (gates_size > 1) {
-            std::cerr << "InterHT[0][1]=" << env->hpa_h.InterHT[0][1] << std::endl;
-            std::cerr << "InterHT[1][0]=" << env->hpa_h.InterHT[1][0] << std::endl;
+            compute_inter_from(env, 0);  // compute from first gate
+            std::cerr << "inter_cache[0][1]=" << env->hpa_h.inter_cache[0][1] << std::endl;
+            env->hpa_h.inter_cache.clear();  // clear test, let it build lazily during scheduling
         }
+
         int non_inf = 0;
         for (int i = 0; i < (int)env->hpa_h.InterHT.size(); i++)
             for (int j = 0; j < (int)env->hpa_h.InterHT[i].size(); j++)
                 if (env->hpa_h.InterHT[i][j] != INTERVAL_MAX) non_inf++;
         std::cerr << "Step 5: generateHighways" << std::endl;
 
-        // generateHighways(env, centroids);
+        generateHighways(env, centroids);
 
         std::cerr << "InterHT non-INTERVAL_MAX entries=" << non_inf << std::endl;
         

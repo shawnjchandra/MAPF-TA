@@ -4,6 +4,7 @@
 #include "heuristics.h"
 #include "utils.h"
 #include <utility>
+#include <set>
 
 namespace CustomAlgo{
 
