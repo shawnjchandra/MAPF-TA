@@ -251,151 +251,25 @@ namespace CustomAlgo{
         }
     }
 
-    // void generate_HPAHMap(SharedEnvironment* env, std::vector<int> centroids) {
-    //     // Step 0 : Inisialisasi vector neighbor, menyimpan setiap lokasi neighbor dari setiap usable cell
-    //     CustomAlgo::init_neighbor(env);
-
-    //     //Step 1 : Index semua cluster
-    //     cluster_indexing(env);
-
-    //     // Step 2 : Bikin HPA pertama
-    //     build_entrances(env);
-    //     build_abstract_graph(env);
-    //     build_InterHT(env);
-    
-    //     // Step 3 : Generate Highways
-    //     generateHighways(env, centroids);
-
-    //     // Step 4 : HPA + Highways, Perubahan dari pseudocode: r_e_hw disimpan dalam env
-    //     build_abstract_graph(env);    
-    //     build_InterHT(env);
-        
-    //     warmup_inter_cache(env);
-    //     }   
-    // }
-
-    void dumpPreprocessingData(SharedEnvironment* env) {
-    std::string prefix = "/tmp/" + env->map_name + "_";
-    std::cerr << "[DUMP] writing to " << prefix << "..." << std::endl;
-
-    // 1. Base map (obstacles)
-    std::ofstream f1(prefix + "preprocess_map.csv");
-    for (int row = 0; row < env->rows; row++) {
-        for (int col = 0; col < env->cols; col++) {
-            f1 << env->map[row * env->cols + col];
-            if (col < env->cols - 1) f1 << ",";
-        }
-        f1 << "\n";
-    }
-    f1.close();
-
-    // 2. Voronoi map
-    std::ofstream f2(prefix + "preprocess_voronoi.csv");
-    for (int row = 0; row < env->rows; row++) {
-        for (int col = 0; col < env->cols; col++) {
-            f2 << env->hpa_h.voronoi_map[row * env->cols + col];
-            if (col < env->cols - 1) f2 << ",";
-        }
-        f2 << "\n";
-    }
-    f2.close();
-
-    // 3. Gates map (1 = gate, 0 = not gate)
-    std::unordered_set<int> gate_set(
-        env->hpa_h.AG.gates.begin(),
-        env->hpa_h.AG.gates.end()
-    );
-    std::ofstream f3(prefix + "preprocess_gates.csv");
-    for (int row = 0; row < env->rows; row++) {
-        for (int col = 0; col < env->cols; col++) {
-            int loc = row * env->cols + col;
-            f3 << (gate_set.count(loc) ? 1 : 0);
-            if (col < env->cols - 1) f3 << ",";
-        }
-        f3 << "\n";
-    }
-    f3.close();
-
-    // 4. Highway edges (row1,col1,row2,col2)
-    std::ofstream f4(prefix + "preprocess_highways.csv");
-    for (auto& [from, to] : env->hpa_h.hw.e_hw) {
-        int loc_from = from.first;
-        int loc_to   = to.first;
-        f4 << (loc_from / env->cols) << "," << (loc_from % env->cols) << ","
-           << (loc_to   / env->cols) << "," << (loc_to   % env->cols) << "\n";
-    }
-    f4.close();
-
-    // 5. Cluster centers (cluster_id, row, col) — first gate per cluster
-    std::ofstream f5(prefix + "preprocess_cluster_centers.csv");
-    for (int c = 0; c < env->k; c++) {
-        if (!env->hpa_h.Gates[c].empty()) {
-            int loc = env->hpa_h.Gates[c][0];
-            f5 << c << "," << (loc / env->cols) << "," << (loc % env->cols) << "\n";
-        }
-    }
-    f5.close();
-
-    std::cerr << "[DUMP] done. gates=" << gate_set.size()
-              << " hw_edges=" << env->hpa_h.hw.e_hw.size() << std::endl;
-}
-
     void generate_HPAHMap(SharedEnvironment* env, std::vector<int> centroids) {
-    auto t_total = std::chrono::high_resolution_clock::now();
-    auto elapsed = [&](auto t) {
-        return std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::high_resolution_clock::now() - t).count();
-    };
+        // Step 0 : Inisialisasi vector neighbor, menyimpan setiap lokasi neighbor dari setiap usable cell
+        CustomAlgo::init_neighbor(env);
 
-    auto t0 = std::chrono::high_resolution_clock::now();
-    // CustomAlgo::init_neighbor(env);
-    // std::cerr << "[HPA] Step 0 init_neighbor:        " << elapsed(t0) << "ms" << std::endl;
+        //Step 1 : Index semua cluster
+        cluster_indexing(env);
 
-    t0 = std::chrono::high_resolution_clock::now();
-    cluster_indexing(env);
-    std::cerr << "[HPA] Step 1 cluster_indexing:     " << elapsed(t0) << "ms" << std::endl;
-
-    t0 = std::chrono::high_resolution_clock::now();
-    build_entrances(env);
-    std::cerr << "[HPA] Step 2a build_entrances:     " << elapsed(t0) << "ms"
-              << "  ents=" << env->hpa_h.Ents.size() << std::endl;
-
-    t0 = std::chrono::high_resolution_clock::now();
-    build_abstract_graph(env);
-    std::cerr << "[HPA] Step 2b build_abstract(1st): " << elapsed(t0) << "ms"
-              << "  gates=" << env->hpa_h.AG.gates.size() << std::endl;
-
-    t0 = std::chrono::high_resolution_clock::now();
-    build_InterHT(env);
-    std::cerr << "[HPA] Step 2c build_InterHT(1st):  " << elapsed(t0) << "ms" << std::endl;
-
-    t0 = std::chrono::high_resolution_clock::now();
-    generateHighways(env, centroids);
-    std::cerr << "[HPA] Step 3  generateHighways:    " << elapsed(t0) << "ms"
-              << "  hw_edges=" << env->hpa_h.hw.e_hw.size() << std::endl;
-
-    t0 = std::chrono::high_resolution_clock::now();
-    build_abstract_graph(env);
-    std::cerr << "[HPA] Step 4a build_abstract(2nd): " << elapsed(t0) << "ms" << std::endl;
-
-    t0 = std::chrono::high_resolution_clock::now();
-    build_InterHT(env);
-    std::cerr << "[HPA] Step 4b build_InterHT(2nd):  " << elapsed(t0) << "ms" << std::endl;
+        // Step 2 : Bikin HPA pertama
+        build_entrances(env);
+        build_abstract_graph(env);
+        build_InterHT(env);
     
-    // t0 = std::chrono::high_resolution_clock::now();
-    // warmup_inter_cache(env);
-    // std::cerr << "[HPA] Step 5  warmup_inter_cache:  " << elapsed(t0) << "ms"
-    //           << "  cache_size=" << env->hpa_h.inter_cache.size() << std::endl;
-    
-    t0 = std::chrono::high_resolution_clock::now();
-    warmup_inter_cache(env);
-    std::cerr << "[HPA] Step 5 warmup inter cache:  " << elapsed(t0) << "ms" << std::endl;
-    
+        // Step 3 : Generate Highways
+        generateHighways(env, centroids);
 
-    t0 = std::chrono::high_resolution_clock::now();
-dumpPreprocessingData(env);
-std::cerr << "[HPA] Step 6 dump:             " << elapsed(t0) << "ms" << std::endl;
-
-    std::cerr << "[HPA] TOTAL generate_HPAHMap:      " << elapsed(t_total) << "ms" << std::endl;
+        // Step 4 : HPA + Highways, Perubahan dari pseudocode: r_e_hw disimpan dalam env
+        build_abstract_graph(env);    
+        build_InterHT(env);
+        
+        warmup_inter_cache(env);
     }
 }
