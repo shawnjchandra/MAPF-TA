@@ -62,7 +62,7 @@ int query_heuristic(SharedEnvironment* env, int src, int src_orient, int dest) {
 
     for (int g_s : env->hpa_h.Gates[c_src]) {
         int g_s_local = env->hpa_h.global_to_local[g_s];
-        int g_s_idx   = env->hpa_h.gate_index[g_s];
+        int g_s_idx   = env->hpa_h.AG.gate_index[g_s];
         if (g_s_idx == INTERVAL_MAX) continue;
 
         // g_s must be a precomputed gate destination in IntraHT
@@ -83,7 +83,7 @@ int query_heuristic(SharedEnvironment* env, int src, int src_orient, int dest) {
 
         for (int g_d : env->hpa_h.Gates[c_dest]) {
             int g_d_local = env->hpa_h.global_to_local[g_d];
-            int g_d_idx   = env->hpa_h.gate_index[g_d];
+            int g_d_idx   = env->hpa_h.AG.gate_index[g_d];
             if (g_d_idx == INTERVAL_MAX) continue;
 
             int cost_inter = env->hpa_h.inter_cache[g_s_idx][g_d_idx];

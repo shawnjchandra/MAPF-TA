@@ -198,6 +198,11 @@ void BaseSystem::initialize()
     env->cols = map.cols;
     env->map = map.map;
 
+    // Coba ambil loc awal
+    env->agent_starts.resize(starts.size());
+    for (int i = 0; i < (int)starts.size(); i++)
+        env->agent_starts[i] = starts[i].location;
+
     
     // // bool succ = load_records(); // continue simulating from the records
     // timestep = 0;

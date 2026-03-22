@@ -80,7 +80,7 @@ namespace CustomAlgo{
             q.push(src);
         }
 
-        while (!q.empty()) {  // FIFO-Based clustering
+        while (!q.empty()) {  // FIFO-Based clustering / Multi source BFS
             int cur = q.front(); q.pop();
             CustomAlgo::getNeighborLocs(&(env->ns), Neighbors, cur);
             for (int nb : Neighbors) {

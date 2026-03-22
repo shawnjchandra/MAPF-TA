@@ -97,7 +97,9 @@ namespace CustomAlgo{
 		};
 
 	struct AbstractGraph{
-		std::vector<int> gates;
+		std::vector<int> gates;	//Daftar seluruh gates secara gabungan
+		std::vector<int> gate_index; // Memetakan lokasi global gate dengan sebuah index
+
 		std::map<std::pair<int,int>, int> intra;
 		std::map<std::pair<int,int>, int> inter;
 		std::map<int,std::vector<int>> neighbors;
@@ -123,13 +125,14 @@ namespace CustomAlgo{
 
 	struct HPA_H {
 		AbstractGraph AG;
-		std::vector<std::map<int, std::vector<std::array<int,4>>>> IntraHT; //Cluster, Destination Local, Source Local, Orientation
-		std::vector<std::vector<int>> InterHT;
-		std::vector<std::vector<int>> Gates;
+		std::vector<std::map<int, std::vector<std::array<int,4>>>> IntraHT; //Cluster, Destination Local, Source Local, Orientation  ,HT antara gates (dalam cluster)
+		std::vector<std::vector<int>> InterHT; //HT antar gates (diluar cluster)
+		
+		std::vector<std::vector<int>> Gates;	//Menyimpan seluruh gate pada masing-masing cluster
+
 		std::vector<Entrances> Ents;
 		std::vector<std::vector<int>> local_to_global;
 		std::vector<int> global_to_local;
-		std::vector<int> gate_index;
 		std::vector<int> voronoi_map;
 		Highways hw;
 
