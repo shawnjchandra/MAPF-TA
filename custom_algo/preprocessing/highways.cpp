@@ -39,41 +39,33 @@ namespace CustomAlgo{
     env->hpa_h.hw.e_hw.clear();
     env->hpa_h.hw.r_e_hw.clear();
 
-    auto t0 = std::chrono::high_resolution_clock::now();
-    auto elapsed = [&](auto t) {
-        return std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::high_resolution_clock::now() - t).count();
-    };
+    std::vector<int> prev;
+    prev.resize(env->map.size(), -1);
+    std::vector<bool> visited;
+    visited.resize(env->map.size(), false);
 
-    // Only connect centroids of neighboring clusters (have shared entrance)
-    // Use set to avoid duplicate pairs
     std::set<std::pair<int,int>> done_pairs;
-
     std::vector<std::pair<int,int>> path;
+
     int done = 0;
 
     for (const Entrances& e : env->hpa_h.Ents) {
+        if (done >= env->max_hw) break;
         int c_a = e.c_a;
         int c_b = e.c_b;
 
-        // Skip if already processed this cluster pair
-        auto key = std::make_pair(min(c_a, c_b), max(c_a, c_b));
+        std::pair<int,int> key = std::make_pair(min(c_a, c_b), max(c_a, c_b));
         if (done_pairs.count(key)) continue;
         done_pairs.insert(key);
 
-        // Get centroid for each cluster
+        
         if (c_a >= (int)centroids.size() || c_b >= (int)centroids.size()) continue;
         int start = centroids[c_a];
         int goal  = centroids[c_b];
         if (start == goal) continue;
 
-        path = extractPathFromH_HW(start, goal, env);
+        path = extractPathFromH_HW(start, goal, env, prev, visited);
         done++;
-
-        if (done % 50 == 0)
-            std::cerr << "  [HW] progress=" << done 
-                      << "/" << done_pairs.size()
-                      << " elapsed=" << elapsed(t0) << "ms" << std::endl;
 
         if (path.empty()) continue;
 
@@ -93,63 +85,42 @@ namespace CustomAlgo{
         }
     }
 
-    std::cerr << "[HW] DONE pairs=" << done_pairs.size()
-              << " edges=" << env->hpa_h.hw.e_hw.size()
-              << " total=" << elapsed(t0) << "ms" << std::endl;
 }
 
 
-    std::vector<std::pair<int,int>> extractPathFromH_HW(int start, int goal, SharedEnvironment* env) {
+    std::vector<std::pair<int,int>> extractPathFromH_HW(int start, int goal, SharedEnvironment* env, std::vector<int> prev,  std::vector<bool> visited) {
         if (start == goal) return {{start, 0}};
-
-        auto t0 = std::chrono::high_resolution_clock::now();
-        auto elapsed = [&](auto t) {
-            return std::chrono::duration_cast<std::chrono::milliseconds>(
-                std::chrono::high_resolution_clock::now() - t).count();
-        };
-
-        std::vector<int> prev(env->map.size(), -1);
-        std::vector<bool> visited(env->map.size(), false);
-        std::queue<int> q;
+        
+        std::vector<std::pair<int,int>> path;
         std::vector<int> Neighbors;
+        std::queue<int> q;
+
+        
 
         q.push(start);
         visited[start] = true;
 
-        int steps = 0;
         while (!q.empty()) {
             int cur = q.front(); q.pop();
-            steps++;
-
             if (cur == goal) break;
 
             CustomAlgo::getNeighborLocs(&(env->ns), Neighbors, cur);
             for (int neigh : Neighbors) {
-                if (env->map[neigh] == 1) continue;
-                if (visited[neigh]) continue;
+                if (env->map[neigh] == 1 || visited[neigh]) continue; 
                 visited[neigh] = true;
                 prev[neigh] = cur;
                 q.push(neigh);
             }
         }
 
-        long bfs_ms = elapsed(t0);
-
         if (prev[goal] == -1 && start != goal) {
-            std::cerr << "  [PATH] start=" << start << " goal=" << goal 
-                    << " UNREACHABLE steps=" << steps 
-                    << " time=" << bfs_ms << "ms" << std::endl;
             return {};
         }
 
-        // Reconstruct path
-        auto t1 = std::chrono::high_resolution_clock::now();
-        std::vector<std::pair<int,int>> path;
         int cur = goal;
         while (cur != start) {
             int p = prev[cur];
             if (p == -1) {
-                std::cerr << "  [PATH] ERROR broken path at cur=" << cur << std::endl;
                 return {};
             }
             int orient = getOrientationBetween(p, cur);
@@ -158,11 +129,6 @@ namespace CustomAlgo{
         }
         path.push_back({start, path.empty() ? 0 : path.back().second});
         std::reverse(path.begin(), path.end());
-
-        std::cerr << "  [PATH] start=" << start << " goal=" << goal
-                << " path_len=" << path.size()
-                << " bfs=" << bfs_ms << "ms"
-                << " reconstruct=" << elapsed(t1) << "ms" << std::endl;
 
         return path;
     }

@@ -31,6 +31,7 @@ public:
     int k;  //Number of cluster
     int c_penalty;  //Penalty constant for going against highway
     int r; //radius
+    int max_hw; //Limiting the amount of highways generated
     // ------------------------------
 
 

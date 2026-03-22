@@ -10,7 +10,7 @@ namespace CustomAlgo{
 
     void generateHighways(SharedEnvironment* env,  std::vector<int> centroids);
 
-    std::vector<std::pair<int,int>>  extractPathFromH_HW(int start,int goal,SharedEnvironment* env);
+    std::vector<std::pair<int,int>> extractPathFromH_HW(int start, int goal, SharedEnvironment* env, std::vector<int> prev,  std::vector<bool> visited);
 
     void reverseHighways(SharedEnvironment* env);
 }

@@ -1,72 +1,96 @@
 #include "voronoi.h"
 
 namespace CustomAlgo{
+    
+   void bfs_update(int src, std::vector<int>& min_dist, int map_size, SharedEnvironment* env) {
+        std::queue<int> q;
+        std::vector<int> Neighbors;
+        std::vector<int> bfs_dist;
+        bfs_dist.resize(map_size, INTERVAL_MAX);
+        
+        q.push(src);
+        bfs_dist[src] = 0;
+        while (!q.empty()) {
+            int cur = q.front(); q.pop();
+            CustomAlgo::getNeighborLocs(&(env->ns), Neighbors, cur);
+            for (int nb : Neighbors) {
+                if (env->map[nb] == 1 || bfs_dist[nb] != INTERVAL_MAX) continue; // Obstacle atau udah pernah diisi
+
+                // Update dan masuk ke queue kalau sebelumnya belum pernahb 
+                bfs_dist[nb] = bfs_dist[cur] + 1;
+                q.push(nb);
+            }
+        }
+
+        // Update global min_dist
+        for (int i = 0; i < map_size; i++) {
+            if (bfs_dist[i] < min_dist[i]) min_dist[i] = bfs_dist[i];
+        }
+    }
 
     std::vector<int> maximin_sampling(SharedEnvironment* env) {
-        std::vector<bool> selected;
-        selected.resize(env->map.size());
+        int map_size = env->map.size();
         
         std::vector<int> interest_points;
+        std::vector<int> min_dist(map_size, INTERVAL_MAX);
         interest_points.reserve(env->k);
-
+        
         int p;
-        do {
-            p = CustomAlgo::rng(0, env->map.size() - 1);
-        } while (env->map[p] == 1);
-
+        do { 
+            p = CustomAlgo::rng(0, map_size - 1); } 
+        while (env->map[p] == 1);
         interest_points.push_back(p);
-        selected[p] = true;
 
-        for (int i = 0; i < env->k-1; i++) {
-            int max_min_dist = -1;
-            int selected_idx = -1;
-            
-            for(int j = 0 ; j < env->map.size() ; j ++) {
-                if (!selected[j] && env->map[j] == 0) {
-                    int min_dist = INTERVAL_MAX;
+        bfs_update(p,min_dist,map_size, env);
 
-                    for (p = 0 ; p < interest_points.size() ; p++) {
-                        int dist = CustomAlgo::manhattanDistance(j, interest_points[p], env);
-                        if(dist < min_dist) min_dist = dist;
-                    }
-
-                    if (min_dist > max_min_dist) {
-                        max_min_dist = min_dist;
-                        selected_idx = j;
-                    }
+        for (int i = 1; i < env->k; i++) {
+            int best_loc = -1;
+            int best_dist = -1;
+            for (int j = 0; j < map_size; j++) {
+                if (env->map[j] == 1) continue;
+                
+                if (min_dist[j] > best_dist) {
+                    best_dist = min_dist[j];
+                    best_loc = j;
                 }
             }
 
-            if (selected_idx != -1) {
-                interest_points.push_back(selected_idx);
-                selected[selected_idx] = true;
-            }
+            interest_points.push_back(best_loc);
+            bfs_update(best_loc, min_dist, map_size, env);  
         }
 
         return interest_points;
     }
-    
+
     void voronoi_generation(SharedEnvironment* env, std::vector<int> centroids) {
+        std::queue<int> q;
+        std::vector<int> Neighbors;
+
         env->hpa_h.voronoi_map.resize(env->map.size(), -1);
+        int map_size = env->map.size();
+        std::vector<int> dist(map_size, INTERVAL_MAX);
 
-        for (int row = 0 ; row < env->rows; row++) {
-            for (int col = 0 ; col < env->cols ; col++) {
-                
-                if (env->map[row * env->cols + col] == 0) {
-                    int min_dist = INTERVAL_MAX;;
-                    int label = -1;
+        for (int k = 0; k < centroids.size(); k++) {
+            int src = centroids[k];
 
-                    for (int k = 0; k < centroids.size(); k++) {
-                        int dist = CustomAlgo::manhattanDistance(row * env->cols + col, centroids[k], env);
+            if (env->map[src] == 1) continue;
+            
+            dist[src] = 0;
+            env->hpa_h.voronoi_map[src] = k;
+            q.push(src);
+        }
 
-                        if (dist < min_dist) {
-                            min_dist = dist;
-                            label = k;
-                        }
-                    }
-                    env->hpa_h.voronoi_map[row * env->cols + col] = label;
-                }
+        while (!q.empty()) {  // FIFO-Based clustering
+            int cur = q.front(); q.pop();
+            CustomAlgo::getNeighborLocs(&(env->ns), Neighbors, cur);
+            for (int nb : Neighbors) {
+                if (env->map[nb] == 1 || dist[nb] != INTERVAL_MAX) continue;
+
+                dist[nb] = dist[cur] + 1;
+                env->hpa_h.voronoi_map[nb] = env->hpa_h.voronoi_map[cur];
+                q.push(nb);
             }
         }
+
     }
 }
