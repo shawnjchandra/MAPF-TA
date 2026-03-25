@@ -2,6 +2,8 @@
 
 
 namespace CustomAlgo{
+
+    // Hitung offset statis (1x saja)
     std::vector<int> generateOffset(int r, int cols) {
         std::vector<int> offsets;
         for (int dr = -r ; dr <= r ; dr++) {

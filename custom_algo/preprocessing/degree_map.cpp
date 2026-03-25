@@ -1,6 +1,8 @@
 #include "degree_map.h"
 
 namespace CustomAlgo{
+
+    // Hanya hitung nilai neighbor di lokasi loc saja
     int degreeNeighbors(SharedEnvironment* env, int loc) {
         int deg = 0;
         if(env->map[loc] = 0) {

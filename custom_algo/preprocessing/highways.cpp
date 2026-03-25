@@ -2,6 +2,12 @@
 
 namespace CustomAlgo{
 
+    /**
+     * @brief Buat highway (penaltized one-way directed edges) untuk setiap centroid (sejumlah limitNumHW)
+     * 
+     * @param env 
+     * @param centroids 
+     */
     void generateHighways(SharedEnvironment* env, std::vector<int> centroids) {
         env->hpa_h.hw.e_hw.clear();
         env->hpa_h.hw.r_e_hw.clear();
@@ -19,8 +25,8 @@ namespace CustomAlgo{
         for (const Entrances& e : env->hpa_h.Ents) {
 
             // Batas jumlah highway
-            
             if (done >= env->max_hw) break;
+
             int c_a = e.c_a;
             int c_b = e.c_b;
 
@@ -37,18 +43,21 @@ namespace CustomAlgo{
 
             if (path.empty()) continue;
 
+            //Catat untuk setiap edges pada path
             for (int i = 0; i <  path.size() - 1; i++) {
                 int curr_loc         = path[i].first;
                 int curr_orientation = path[i].second;
                 int next_loc         = path[i+1].first;
                 int next_orientation = path[i+1].second;
 
+                //Arah dan jalan yang TIDAK dipenalty
                 env->hpa_h.hw.e_hw[{curr_loc, curr_orientation}] =
                     {next_loc, next_orientation};
 
                 int curr_r_o = reverseOrientation(curr_orientation);
                 int next_r_o = reverseOrientation(next_orientation);
                 
+                //Arah dan jalur yang dipenalty
                 env->hpa_h.hw.r_e_hw[{next_loc, next_r_o}] =
                     {curr_loc, curr_r_o};
             }
@@ -56,6 +65,16 @@ namespace CustomAlgo{
     }
 
 
+    /**
+     * @brief BFS dari lokasi destination (start) ke source (goal) dan reverse ketika telah selesai. Tidak mengutamakan cost.
+     * 
+     * @param start 
+     * @param goal 
+     * @param env 
+     * @param prev 
+     * @param visited 
+     * @return std::vector<std::pair<int,int>> 
+     */
     std::vector<std::pair<int,int>> extractPathFromH_HW(int start, int goal, SharedEnvironment* env, std::vector<int> prev,  std::vector<bool> visited) {
         if (start == goal) return {{start, 0}};
         
@@ -66,8 +85,10 @@ namespace CustomAlgo{
         q.push(start);
         visited[start] = true;
 
+        // Data seluruh neighbor dan jalur dari destination ke source ke dalam array prev
         while (!q.empty()) {
-            int cur = q.front(); q.pop();
+            int cur = q.front(); 
+            q.pop();
             if (cur == goal) break;
 
             CustomAlgo::getNeighborLocs(&(env->ns), Neighbors, cur);
@@ -101,6 +122,7 @@ namespace CustomAlgo{
         return path;
     }
 
+    //Putar balikan jalur penalty
     void reverseHighways(SharedEnvironment* env) {
         auto temp = env->hpa_h.hw.e_hw;
         env->hpa_h.hw.e_hw = env->hpa_h.hw.r_e_hw;

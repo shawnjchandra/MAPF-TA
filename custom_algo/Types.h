@@ -125,7 +125,9 @@ namespace CustomAlgo{
 
 	struct HPA_H {
 		AbstractGraph AG;
-		std::vector<std::map<int, std::vector<std::array<int,4>>>> IntraHT; //Cluster, Destination Local, Source Local, Orientation  ,HT antara gates (dalam cluster)
+
+		//Cluster, Destination Local, Source Local, Orientation.HT antara gates (dalam cluster) 
+		std::vector<std::map<int, std::vector<std::array<int,4>>>> IntraHT;
 		std::vector<std::vector<int>> InterHT; //HT antar gates (diluar cluster)
 		
 		std::vector<std::vector<int>> Gates;	//Menyimpan seluruh gate pada masing-masing cluster
