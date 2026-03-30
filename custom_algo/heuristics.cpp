@@ -43,8 +43,8 @@ namespace CustomAlgo{
      */
     int query_heuristic(SharedEnvironment* env, int src, int src_orient, int dest) {
         // Cek lokasi tujuan dan destinasi valid
-        if (src < 0 || src >= env->map.size()) return INTERVAL_MAX;
-        if (dest < 0 || dest >= env->map.size()) return INTERVAL_MAX;
+        // if (src < 0 || src >= env->map.size()) return INTERVAL_MAX;
+        // if (dest < 0 || dest >= env->map.size()) return INTERVAL_MAX;
         if (env->map[src] == 1 || env->map[dest] == 1) return INTERVAL_MAX;
 
         int c_src  = env->hpa_h.voronoi_map[src];
@@ -52,8 +52,8 @@ namespace CustomAlgo{
 
         //Cek cluster valid
         if (c_src == -1 || c_dest == -1) return INTERVAL_MAX;
-        if (c_src  >= env->hpa_h.IntraHT.size()) return INTERVAL_MAX;
-        if (c_dest >= env->hpa_h.IntraHT.size()) return INTERVAL_MAX;
+        // if (c_src  >= env->hpa_h.IntraHT.size()) return INTERVAL_MAX;
+        // if (c_dest >= env->hpa_h.IntraHT.size()) return INTERVAL_MAX;
 
         int src_local  = env->hpa_h.global_to_local[src];
         int dest_local = env->hpa_h.global_to_local[dest];
@@ -63,8 +63,8 @@ namespace CustomAlgo{
 
             // Validasi source dan destionation secara lokal
             int cluster_size = env->hpa_h.local_to_global[c_src].size();
-            if (src_local  >= cluster_size) return INTERVAL_MAX;
-            if (dest_local >= cluster_size) return INTERVAL_MAX;
+            // if (src_local  >= cluster_size) return INTERVAL_MAX;
+            // if (dest_local >= cluster_size) return INTERVAL_MAX;
             
             // Lazy compute jika belum ada
             if (env->hpa_h.IntraHT[c_src].find(dest_local) ==

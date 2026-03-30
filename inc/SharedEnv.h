@@ -35,6 +35,18 @@ public:
 
     //Mungkin Tak maasalah
     std::vector<int> agent_starts;
+
+    vector<int> agt_unopened_tasks; 
+    vector<int> agt_opened_tasks; 
+
+    int total_actual_duration = 0;
+    int total_min_duration = 0;
+    int num_task_finished = 0;
+
+    std::vector<int> square_density;
+    std::vector<int> newly_completed_tasks;
+    std::vector<int> reserved_task_schedule;
+    std::unordered_map<int,int> makespan;
     // ------------------------------
 
 

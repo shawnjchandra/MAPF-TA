@@ -215,7 +215,7 @@ namespace CustomAlgo{
     }
 
     /**
-     * @brief Dijkstra untuk InterHT. Mencari jalur terdekat antar gate
+     * @brief Dijkstra untuk InterHT. Mencari jalur terdekat antar gate-gate di cluster tujuan, dengan gate dari gate_idx. O(P x G_c)
      * 
      * @param env 
      * @param gate_idx 
@@ -251,7 +251,7 @@ namespace CustomAlgo{
                     } else {                                           //Kalau dalam cluster
                         w = env->hpa_h.AG.intra[{u_loc, v_loc}];
                     }
-                    }
+                }
                 
                 int v = env->hpa_h.AG.gate_index[v_loc];
                 if (v == INTERVAL_MAX) continue;

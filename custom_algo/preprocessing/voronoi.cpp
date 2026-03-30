@@ -65,7 +65,7 @@ namespace CustomAlgo{
         // Inisialisasi nilai dist dari lokasi pertama
         bfs_update(p,min_dist,map_size, env);
 
-        // Cari untuk untuk k-1 point lainnya, O(k*n) 
+        // Cari untuk untuk k-1 point lainnya, O(k*(n+n)) 
         for (int i = 1; i < env->k; i++) {
             int best_loc = -1;
             int best_dist = -1;

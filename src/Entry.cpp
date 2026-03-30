@@ -19,7 +19,7 @@ void Entry::compute(int time_limit, std::vector<Action> & plan, std::vector<int>
 
 }
 
-void Entry::update_goal_locations(std::vector<int> & proposed_schedule)
+void Entry::update_goal_locations(std::vector<int> & proposed_schedule, std::vector<int> & reserved_schedule)
 {
 
 }

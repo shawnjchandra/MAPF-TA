@@ -32,6 +32,10 @@ struct Task
         return idx_next_loc == locations.size();
     }
 
+    bool is_assigned() {
+        return agent_assigned != -1;
+    }
+
     //Task(int task_id, int location): task_id(task_id), locations({location}) {};
     Task(int task_id, list<int> location, int t_revealed): task_id(task_id), t_revealed(t_revealed)
     {

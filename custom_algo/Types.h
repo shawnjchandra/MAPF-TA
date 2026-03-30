@@ -81,7 +81,6 @@ namespace CustomAlgo{
 				return value < other.value;
 			}
 
-			// And this (priority queue needs greater-than too):
 			bool operator>(const HNode& other) const {
 				return value > other.value;
 			}

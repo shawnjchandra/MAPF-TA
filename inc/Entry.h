@@ -14,7 +14,7 @@ public:
     SharedEnvironment* env;
     MAPFPlanner* planner;
     TaskScheduler* scheduler;
-    Preprocessing* preprocessing; // Your custom class
+    Preprocessing* preprocessing; 
 
     Entry(SharedEnvironment* env): env(env)
     {
@@ -40,7 +40,8 @@ public:
 
     virtual void initialize(int preprocess_time_limit);
 
-    // RESTORE THESE! We need them to exist to pass compilation
     virtual void compute(int time_limit, std::vector<Action> & plan, std::vector<int> & proposed_schedule);
-    void update_goal_locations(std::vector<int> & proposed_schedule);
+
+    // void update_goal_locations(std::vector<int> & proposed_schedule);
+    void update_goal_locations(std::vector<int> & proposed_schedule,std::vector<int> & reserved_schedule);
 };
