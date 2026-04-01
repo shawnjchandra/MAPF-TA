@@ -98,7 +98,7 @@ namespace CustomAlgo{
         int cluster_size = env->hpa_h.local_to_global[cluster].size();
         int dest_local = env->hpa_h.global_to_local[dest];
 
-        ht.resize(cluster_size);
+        // Langsung assign aja
         ht.assign(cluster_size, {INTERVAL_MAX,INTERVAL_MAX,INTERVAL_MAX,INTERVAL_MAX});
 
         //Inisialisasi untuk setiap orientasi di lokasi awal
@@ -159,12 +159,13 @@ namespace CustomAlgo{
      */
     void build_abstract_graph(SharedEnvironment* env) {
         int k = env->k;
-
-        env->hpa_h.IntraHT.clear();      
+        
         env->hpa_h.AG.intra.clear();     
         env->hpa_h.AG.inter.clear();     
         env->hpa_h.AG.neighbors.clear();
-        env->hpa_h.IntraHT.resize(k);
+        
+        // Assign aja untuk timpa, jadi ga perlu 2 kali pemanggilan
+        env->hpa_h.IntraHT.assign(k, {});
 
         // Jalanin hanya sekali karena gates tidak akan berubah (tidak terpengaruh HW)
         if (env->hpa_h.AG.gates.empty())
@@ -291,7 +292,7 @@ namespace CustomAlgo{
 
     void generate_HPAHMap(SharedEnvironment* env, std::vector<int> centroids) {
         // Step 0 : Inisialisasi vector neighbor, menyimpan setiap lokasi neighbor dari setiap usable cell
-        CustomAlgo::init_neighbor(env);
+        // CustomAlgo::init_neighbor(env);
 
         //Step 1 : Index semua cluster
         cluster_indexing(env);
