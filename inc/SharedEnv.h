@@ -46,6 +46,7 @@ public:
     std::vector<int> square_density;
     std::vector<int> newly_completed_tasks;
     std::vector<int> reserved_task_schedule;
+    std::vector<bool> dbc_reserved; // Kalo agen sudah direserved, jangan masukin ke dtr ato dbc lagi sampai task reserved selesai
     std::unordered_map<int,int> makespan;
     // ------------------------------
 
