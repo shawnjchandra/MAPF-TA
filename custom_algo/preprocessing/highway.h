@@ -2,7 +2,7 @@
 
 #include "Types.h"
 #include "heuristics.h"
-#include "utils.h"
+#include "mapf_utils.h"
 #include <utility>
 #include <set>
 

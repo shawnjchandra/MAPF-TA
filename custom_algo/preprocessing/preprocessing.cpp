@@ -15,8 +15,9 @@ void Preprocessing::initialize(int preprocess_time_limit) {
     // Fase 4 : Buat degree dan offset untuk keperluan scheduling dan planning
     std::vector<int> degree_map;
     degree_map.resize(env->map.size());
-    for (int v = 0; v < (int)env->map.size(); v++)
+    for (int v = 0; v < (int)env->map.size(); v++) {
         degree_map[v] = CustomAlgo::degreeNeighbors(env, v);
+    }
 
     std::vector<int> offsets = CustomAlgo::generateOffset(env->r, env->cols);
 

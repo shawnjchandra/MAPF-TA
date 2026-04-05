@@ -208,8 +208,9 @@ namespace CustomAlgo{
             env->hpa_h.AG.gate_index.assign(env->map.size(), INTERVAL_MAX);
     
             int gates_size = env->hpa_h.AG.gates.size();
-            for (int i = 0; i < gates_size; i++)
+            for (int i = 0; i < gates_size; i++) {
                 env->hpa_h.AG.gate_index[env->hpa_h.AG.gates[i]] = i;
+            }
         } 
 
         env->hpa_h.inter_cache.clear();

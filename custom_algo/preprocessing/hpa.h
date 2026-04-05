@@ -3,7 +3,7 @@
 #include <queue>
 #include <set>
 #include "Types.h"
-#include "utils.h"
+#include "mapf_utils.h"
 #include "highway.h"
 #include "SharedEnv.h"
 #include <omp.h>
