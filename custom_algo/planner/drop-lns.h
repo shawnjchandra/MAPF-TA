@@ -4,22 +4,6 @@
 #include "mapf_utils.h"
 #include "Types.h"
 
-/*
-destroy_and_repair
-
-snapshot current best plan Pmin
-pick destroy heuristic by roulette wheel
-select N agents by that heuristic
-measure their old partial cost
-re-run run_pibt_window on just those N agents
-measure new partial cost
-if improved:
-  merge into Pmin
-  increase heuristic weight
-else:
-  decrease heuristic weight
-*/
-
 namespace CustomAlgo {
   
   void run_lns(

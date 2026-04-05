@@ -9,6 +9,15 @@ namespace CustomAlgo {
 
     using Clock = std::chrono::steady_clock;
 
+
+    /**
+     * @brief Method utama untuk menjalankan lns, membuat thread sebanyak m, dan digabungkan pada vector utama.
+     * 
+     * @param lns 
+     * @param non_disabled_agents 
+     * @param env 
+     * @param time_limit_ms 
+     */
     void run_lns(
         LNS& lns,
         const std::vector<int> non_disabled_agents,
@@ -17,6 +26,9 @@ namespace CustomAlgo {
     ) {
         auto start_t = Clock::now();
 
+        /*
+        Vector thread, langsung melakukan destroy dan repair tanpa enkapsulasi tambahan (agar sederhana)
+        */
         std::vector<std::thread> threads;
         for (int i = 0 ; i < env->m ; i++) {
             threads.emplace_back([&](){
@@ -30,10 +42,19 @@ namespace CustomAlgo {
             });
         }
 
+        //Join ke main thread
         for (std::thread& t : threads) t.join();
     
     }
 
+
+    /**
+     * @brief Method untuk melakukan destroy dan repair (D&R) dari LNS.
+     * 
+     * @param lns 
+     * @param non_disabled_agents 
+     * @param env 
+     */
     void destroy_and_repair( 
         LNS& lns,
         const std::vector<int> non_disabled_agents,
@@ -102,6 +123,19 @@ namespace CustomAlgo {
         
     }
 
+    /**
+     * @brief Switch case untuk pemilihan heuristic. Tidak sepenuhnya menerapakan paper "Anytime MAPF", hanya konsep heuristik saja.
+     * Random : Diurutkan secara acak
+     * AGENT_BASED : Diurutkan berdasarkan jumlah kondisi wait yang lebih banyak
+     * MAP-BASED : Ambil lokasi random dan hitung jarak antara setiap agen ke lokasi. 
+     * 
+     * @param h 
+     * @param N 
+     * @param plans 
+     * @param non_disabled_agents 
+     * @param env 
+     * @return std::vector<int> 
+     */
     std::vector<int> select_neighbourhood( 
         DestroyHeuristic h, 
         int N, 
@@ -131,6 +165,7 @@ namespace CustomAlgo {
                         if (plans[b][step] == plans[b][step+1] ) wb++;
                     }
                 }
+                return wa > wb;
             });
            break;
        case DestroyHeuristic::MAP_BASED:
@@ -153,6 +188,14 @@ namespace CustomAlgo {
     }
 
 
+    /**
+     * @brief Hitung Sum-of-Costs dari jumlah pergerakan di seluruh plan.
+     * 
+     * @param plans 
+     * @param non_disabled_agents 
+     * @param env 
+     * @return float 
+     */
     float compute_soc(
         const std::vector<std::vector<int>>& plans,
         const std::vector<int> non_disabled_agents,

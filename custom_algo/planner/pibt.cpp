@@ -3,12 +3,20 @@
 #include "heuristics.h"
 namespace CustomAlgo {
 
-    /*
+    /*@notes
         INFO:
         - prev_decision = lokasi SEKARANG dari agen. Di set sekali untuk setiap timestep . Untuk cek swap conflict dan rekursif ke siapa
         - next_decision = lokasi SELANJUTNYA dari agen. Di set pas diawal timestep, dan dipakai / dimodifikasi selama rekursif
         - planner_state.decided = lokasi TUJUAN dan STATE (sudah sampai atau belum) dari agen. Updatenya setiap commit / step. Bertujuan untuk agen yang lagi rotasi, ga dikenain plan.
     */
+
+    /**
+     * @brief Inisialisasi dan running pibt (causal) sepanjang window horizon (w). Mengikuti implementasi pseudocode dengan pencatatan state, dan decision (lihat info ditas) berdasarkan kebutuhan dan untuk mempermudah implementasi.
+     * 
+     * @param non_disabled_agents 
+     * @param env 
+     * @return std::vector<std::vector<int>> 
+     */
     std::vector<std::vector<int>> init_pibt_window (
         std::vector<int> non_disabled_agents,
         SharedEnvironment* env
@@ -134,6 +142,21 @@ namespace CustomAlgo {
         return plans;
     }
 
+    /**
+     * @brief Fungsi Rekursif PIBT. Mengikuti implementasi pada pseudocode
+     * 
+     * @param curr_id 
+     * @param higher_id 
+     * @param prev_states 
+     * @param next_states 
+     * @param prev_decision 
+     * @param next_decision 
+     * @param occupied 
+     * @param goal_per_agents 
+     * @param env 
+     * @return true 
+     * @return false 
+     */
     bool pibt(
             int curr_id,
             int higher_id,
