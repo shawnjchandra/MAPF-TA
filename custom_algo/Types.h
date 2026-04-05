@@ -12,6 +12,10 @@
 #include <unordered_set>
 
 
+#include <mutex>
+#include <atomic>
+#include <thread>
+
 #define MAX_TIMESTEP INT_MAX/2
 
 // #include "SharedEnv.h"
@@ -31,6 +35,13 @@ namespace CustomAlgo{
 	struct DCR{
 		int loc;
 		int state;
+
+		DCR() {
+			loc=-1;
+			state = DONE::NOT_DONE;
+		};
+
+		DCR(int loc, int state) : loc(loc), state(state) {};
 	};
 
 
@@ -95,17 +106,17 @@ namespace CustomAlgo{
 			};  // used by OPEN (open) to compare nodes (top of the open has min f-val, and then highest g-val)
 		};
 
-	struct AbstractGraph{
-		std::vector<int> gates;	//Daftar seluruh gates secara gabungan
-		std::vector<int> gate_index; // Memetakan lokasi global gate dengan sebuah index
+	
 
-		std::map<std::pair<int,int>, int> intra;
-		std::map<std::pair<int,int>, int> inter;
-		std::map<int,std::vector<int>> neighbors;
+	
 
-		AbstractGraph() = default;
+	struct Highways{
+		std::map<std::pair<int,int>,std::pair<int,int>> e_hw;
+        std::map<std::pair<int,int>,std::pair<int,int>> r_e_hw;
+
+		Highways() = default;
 	};
-
+	
 	struct Entrances{
 		int loc_a;
 		int c_a;
@@ -115,14 +126,18 @@ namespace CustomAlgo{
 		Entrances() : c_a(-1), c_b(-1) {};
 	};
 
-	struct Highways{
-		std::map<std::pair<int,int>,std::pair<int,int>> e_hw;
-        std::map<std::pair<int,int>,std::pair<int,int>> r_e_hw;
-
-		Highways() = default;
-	};
-
 	struct HPA_H {
+
+		struct AbstractGraph{
+			std::vector<int> gates;	//Daftar seluruh gates secara gabungan
+			std::vector<int> gate_index; // Memetakan lokasi global gate dengan sebuah index
+
+			std::map<std::pair<int,int>, int> intra;
+			std::map<std::pair<int,int>, int> inter;
+			std::map<int,std::vector<int>> neighbors;
+
+			AbstractGraph() = default;
+		};
 		AbstractGraph AG;
 
 		//Cluster, Destination Local, Source Local, Orientation.HT antara gates (dalam cluster) 
@@ -130,6 +145,8 @@ namespace CustomAlgo{
 		std::vector<std::vector<int>> InterHT; //HT antar gates (diluar cluster)
 		
 		std::vector<std::vector<int>> Gates;	//Menyimpan seluruh gate pada masing-masing cluster
+
+		
 
 		std::vector<Entrances> Ents;
 		std::vector<std::vector<int>> local_to_global;
@@ -142,13 +159,70 @@ namespace CustomAlgo{
 		HPA_H() = default;
 	};
 
+	struct PlannerState{
+		int w;	//Planning horizon / window size
+		int h;  //Replan Period
 
-	struct Degree_Map {
-		std::vector<int> degree_map;
+		//GCM[loc][orient] untuk heat mapnya
+		std::vector<std::array<float,4>> gcm;
+		
+		//[loc][orient] untuk
+		std::vector<std::array<int,4>> wait_map;
+	
+		int gcm_freq = 5; // update wait_map setiap F frequency
 
-		Degree_Map() = default;
+		//Struct untuk simpen nilai wait_peak setiap lokasi
+		struct PeakInfo{
+			float val = 0.0f;
+			int timestep = 0;
+		};
+		std::vector<PeakInfo> w_peak;
+
+		//Baseline weight = 1, asumsi lokasi pasti pernah sekali dilewatin / akan dilewatin
+		float w_baseline = 1.0f;
+
+		// Cooling constant, fisika punya yang namanya Stefan's law untuk radiation cooling tapi kurang bisa dipake angkanya
+		/*
+			k = k[v] = k_base |Neigh[v]|/delta(G)
+			k = k[v] = k_base * {1 sampai 1/4}
+			k = 0.1 sampai 0.025
+
+			exp(-0.1t) sampai exp(-0.025t) = 0.9,0.97 (t=1), 0.6,0.88 (t=5)
+			Untuk sementara, ditaro di 0.1 atau 10%
+		*/
+		float k_base = 0.1f; 
+
+		int max_degree = 4;
+
+		//Plan dari window terakhir , plans[agt_id][step] = loc;
+		std::vector<std::vector<int>> current_plans;
+
+		//Disabled Agents (lokasi dead-end). Dari paper, dan github. Jika exit dan entry hanya ada satu. Mencegah deadlock
+		std::unordered_set<int> disabled;
+
+
+		//Data dari PIBT
+		std::vector<float> priorities;
+		std::vector<float> priorities_base;
+		std::vector<DCR> decided;
 	};
 
+	enum class DestroyHeuristic { AGENT_BASED, RANDOM, MAP_BASED, COUNT };
+	
+	struct LNS{
+
+		std::mutex mtx;
+		std::vector<std::vector<int>> P_min;
+		int P_min_soc = INTERVAL_MAX;
+
+		std::array<float, (int)DestroyHeuristic::COUNT> weights;
+		
+		std::atomic<bool> stop_flag;
+
+		LNS() { 
+			weights.fill(1.0f); 
+		};
+	};
 	typedef std::vector<std::vector<int>> Neighbors;
 
 }

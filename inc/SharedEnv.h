@@ -24,6 +24,8 @@ public:
 
     // Modifikasi
     // ------------------------------
+
+    //Preprocessing
     CustomAlgo::HPA_H hpa_h;
     CustomAlgo::Neighbors ns; // Untuk penggunaan yang berulang
     std::vector<int> degree_map;
@@ -33,7 +35,7 @@ public:
     int r; //radius
     int max_hw; //Limiting the amount of highways generated
 
-    //Mungkin Tak maasalah
+    //Scheduling
     std::vector<int> agent_starts;
 
     vector<int> agt_unopened_tasks; 
@@ -48,6 +50,15 @@ public:
     std::vector<int> reserved_task_schedule;
     std::vector<bool> dbc_reserved; // Kalo agen sudah direserved, jangan masukin ke dtr ato dbc lagi sampai task reserved selesai
     std::unordered_map<int,int> makespan;
+
+    //Planning
+    CustomAlgo::PlannerState planner_state;
+    int horizon;
+    int m; //Jumlah thread Worker
+    int N_prctg; // Neighborhood size percentage (LNS)
+    int gamma; // Variabel untuk update weights dari DestroyHeuristics
+    int alpha // Variabel untuk update gcm
+
     // ------------------------------
 
 
