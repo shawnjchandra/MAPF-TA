@@ -130,9 +130,11 @@ namespace CustomAlgo{
                 //Fase 3 : Heuristik dari gate destinasi ke tujuan (dest)
                 // Ambil nilai dari ke 4 orientasi untuk jarak terpendek
                 int cost_gd_to_dest = INTERVAL_MAX;
-                for (int orient = 0; orient < 4; orient++)
+                for (int orient = 0; orient < 4; orient++) {
                     cost_gd_to_dest = min(cost_gd_to_dest,
                         env->hpa_h.IntraHT[c_dest][dest_local][g_d_local][orient]);
+
+                }
 
                 if (cost_gd_to_dest == INTERVAL_MAX) continue;
 
