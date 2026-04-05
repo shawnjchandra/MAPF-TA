@@ -124,6 +124,16 @@ namespace CustomAlgo{
         return distrib(gen);
     }
 
+    float rng(float max) {
+        //Thread local untuk nanti DROP-LNS juga
+        thread_local std::random_device rd;
+        thread_local std::mt19937 gen(rd());
+
+        std::uniform_real_distribution<float> distrib(max);
+
+        return distrib(gen);
+    }
+
     int getRotationCost(int currentOrientation, int targetOrientation) {
         int diff = abs(currentOrientation-targetOrientation);   // 0, 1 ,2 , 3
         return min(diff, 4-diff);

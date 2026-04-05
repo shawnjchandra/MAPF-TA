@@ -22,6 +22,7 @@ namespace CustomAlgo{
 
     // Modifikasi
     int rng(int min, int max);
+    float rng(float max);
 
     int getRotationCost(int currentOrientation, int targetOrientation);
 
