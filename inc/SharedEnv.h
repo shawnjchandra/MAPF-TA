@@ -57,7 +57,7 @@ public:
     int m; //Jumlah thread Worker
     int N_prctg; // Neighborhood size percentage (LNS)
     int gamma; // Variabel untuk update weights dari DestroyHeuristics
-    int alpha // Variabel untuk update gcm
+    int alpha; // Variabel untuk update gcm
 
     // ------------------------------
 
