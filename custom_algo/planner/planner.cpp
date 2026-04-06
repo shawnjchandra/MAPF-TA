@@ -9,9 +9,13 @@ namespace CustomAlgo{
         int map_size = env->map.size();
         int agent_size = env->num_of_agents;
 
+
+
         auto& ps = env->planner_state;
-        ps.w = max(10, ps.w);
-        ps.h = max(5, ps.h);
+        ps.w = max(3, ps.w);
+        ps.h = max(1, ps.h);
+        env->horizon = ps.h;
+        env->m = 3;
 
         ps.gcm.assign(map_size, {1.0f, 1.0f, 1.0f, 1.0f});
         ps.wait_map.assign(map_size, {0,0,0,0});
@@ -37,8 +41,8 @@ namespace CustomAlgo{
         //Randomizer priorities dari original framework
         std::iota(ids.begin(), ids.end(), 0);
         
-
-        std::shuffle(ids.begin(), ids.end(), env->rng);
+        std::mt19937 gen(0);
+        std::shuffle(ids.begin(), ids.end(), gen);
         for (int i = 0 ; i <ids.size() ; i++) {
             ps.priorities[ids[i]] = ((double)(ids.size() - i))/((double)(ids.size()+1));
         }

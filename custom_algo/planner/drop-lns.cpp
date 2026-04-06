@@ -83,7 +83,9 @@ namespace CustomAlgo {
         */
         float destroyed_soc = compute_soc(P, neighbourhood, env);
 
-        auto repaired_neighbourhood = init_pibt_window(neighbourhood, env);
+        std::vector<std::vector<int>> empty_warm(env->num_of_agents);
+
+        auto repaired_neighbourhood = init_pibt_window(neighbourhood, empty_warm, env);
 
         float repaired_soc = compute_soc(repaired_neighbourhood, neighbourhood, env); 
 
@@ -120,7 +122,7 @@ namespace CustomAlgo {
             acc+= weights[i];
             if ( random <= acc ) return static_cast<DestroyHeuristic>(i);
         }
-        
+        return DestroyHeuristic::RANDOM;
     }
 
     /**
@@ -147,11 +149,13 @@ namespace CustomAlgo {
 
        switch (h)
        {
-       case DestroyHeuristic::RANDOM:
-            std::shuffle(candidates.begin(), candidates.end(), env->rng );
+       case DestroyHeuristic::RANDOM : {
+            std::mt19937 gen(0);
+            std::shuffle(candidates.begin(), candidates.end(), gen);
 
            break;
-       case DestroyHeuristic::AGENT_BASED:
+        }
+       case DestroyHeuristic::AGENT_BASED: {
             std::sort(candidates.begin(), candidates.end(), [&](int a, int b){
                 int wa = 0;
                 int wb = 0;
@@ -168,7 +172,8 @@ namespace CustomAlgo {
                 return wa > wb;
             });
            break;
-       case DestroyHeuristic::MAP_BASED:
+        }
+       case DestroyHeuristic::MAP_BASED: {
             int random_loc = CustomAlgo::rng(0,env->map.size() -1 );
             
             std::sort(candidates.begin(), candidates.end(), [&](int a, int b){
@@ -179,6 +184,7 @@ namespace CustomAlgo {
             });
             
             break;
+        }
        default:
             break;
        }

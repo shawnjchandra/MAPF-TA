@@ -36,6 +36,8 @@ namespace CustomAlgo{
 
                 int curr_makespan = CustomAlgo::query_heuristic(env, agt_state.location, agt_state.orientation, task_loc);
 
+                if (curr_makespan >= INTERVAL_MAX) continue; 
+
                 double delta = gamma * CustomAlgo::task_square_density(task_loc, curr_makespan, env);
 
                 int estimated_task_makespan = curr_makespan + (int) delta;
@@ -59,10 +61,20 @@ namespace CustomAlgo{
             if (best_task == -1) continue;
             
             // Cek best_task udah diambil sama agen lain atau belum. Ambil dan masukan agen B ke agt_dtr untuk reassignment
-            int tta_task_old_agent = task_to_agt[best_task]; 
-            if (tta_task_old_agent != -1 && tta_task_old_agent != agt_id) {
-                proposed_schedule[tta_task_old_agent] = -1;
-                agt_dtr.push_back(tta_task_old_agent);
+            
+            // int tta_task_old_agent = task_to_agt[best_task]; 
+            // if (tta_task_old_agent != -1 && tta_task_old_agent != agt_id) {
+            //     proposed_schedule[tta_task_old_agent] = -1;
+            //     agt_dtr.push_back(tta_task_old_agent);
+            // }
+
+            auto it = task_to_agt.find(best_task);
+            if (it != task_to_agt.end()) {
+                int old_agent = it->second;
+                if (old_agent != agt_id) {
+                    proposed_schedule[old_agent] = -1;
+                    agt_dtr.push_back(old_agent);
+                }
             }
 
             proposed_schedule[agt_id] = best_task;

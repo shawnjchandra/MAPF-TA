@@ -1,6 +1,6 @@
 #include "Entry.h"
 #include "Tasks.h"
-#include "utils.h"
+#include "mapf_utils.h"
 #include "heuristics.h"
 #include <cstdlib> // NEEDED FOR exit(0)
 #include <iostream>
