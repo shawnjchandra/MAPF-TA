@@ -20,6 +20,10 @@ namespace CustomAlgo{
 
     int manhattanDistance(int loc, int loc2,const SharedEnvironment* env);
 
+    Action getAction(State& prev, State& next);
+
+    Action getAction(State& prev, int next_loc, SharedEnvironment* env);
+
     // Modifikasi
     int rng(int min, int max);
     float rng(float max);

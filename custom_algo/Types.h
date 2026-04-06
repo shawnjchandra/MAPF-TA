@@ -197,13 +197,13 @@ namespace CustomAlgo{
 		//Plan dari window terakhir , plans[agt_id][step] = loc;
 		std::vector<std::vector<int>> current_plans;
 
-		//Disabled Agents (lokasi dead-end). Dari paper, dan github. Jika exit dan entry hanya ada satu. Mencegah deadlock
-		std::unordered_set<int> disabled;
+		// //Disabled Agents (lokasi dead-end). Dari paper, dan github. Jika exit dan entry hanya ada satu. Mencegah deadlock
+		// std::unordered_set<int> disabled;
 
 
 		//Data dari PIBT
-		std::vector<float> priorities;
-		std::vector<float> priorities_base;
+		std::vector<double> priorities;
+		std::vector<double> priorities_base;
 		std::vector<DCR> decided;
 	};
 

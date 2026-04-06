@@ -109,6 +109,59 @@ namespace CustomAlgo{
         }
 
     }
+
+    Action getAction(State& prev, State& next){
+	if (prev.location == next.location && prev.orientation == next.orientation){
+		return Action::W;
+	}
+	if (prev.location != next.location && prev.orientation == next.orientation){
+		return Action::FW;
+	}
+	if (next.orientation  == (prev.orientation+1)%4){
+		return Action::CR;
+	}
+	if (next.orientation  == (prev.orientation+3)%4){
+		return Action::CCR;
+	}
+	assert(false);
+	return Action::W;
+}
+
+Action getAction(State& prev, int next_loc, SharedEnvironment* env){
+	if (prev.location == next_loc){
+		return Action::W;
+	}
+	int diff = next_loc -prev.location;
+	int orientation;
+	if (diff == 1){
+		orientation = 0;
+	}
+	if (diff == -1){
+		orientation = 2;
+	}
+	if (diff == env->cols){
+		orientation = 1;
+	}
+	if (diff == -env->cols){
+		orientation = 3;
+	}
+	if (orientation == prev.orientation){
+		return Action::FW;
+	}
+	if (orientation  == (prev.orientation+1)%4){
+		return Action::CR;
+	}
+	if (orientation  == (prev.orientation+3)%4){
+		return Action::CCR;
+	}
+	if (orientation  == (prev.orientation+2)%4){
+		return Action::CR;
+	}
+	assert(false);
+
+
+
+}
     //==================================================================================
 
     // @details

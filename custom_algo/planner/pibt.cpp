@@ -19,6 +19,7 @@ namespace CustomAlgo {
      */
     std::vector<std::vector<int>> init_pibt_window (
         std::vector<int> non_disabled_agents,
+        std::vector<std::vector<int>> warm_plan,
         SharedEnvironment* env
     ){
 
@@ -59,6 +60,7 @@ namespace CustomAlgo {
         }
 
         std::vector<int>order (non_disabled_agents.begin(), non_disabled_agents.end());
+
 
         // 
         std::vector<int> goal_per_agents;
@@ -103,14 +105,38 @@ namespace CustomAlgo {
                 return ps.priorities[a] > ps.priorities[b]; 
             });
 
-            // Jalanin PIBT nya
-            for (int a : order) {
-                // Skip kalau masih rotasi
-                if (ps.decided[a].state == CustomAlgo::DONE::NOT_DONE) continue;
 
-                // Kalau belum punya lokasi selanjutnya
-                if (next_states[a].location == -1) {
-                    pibt(a, -1, prev_states, next_states, prev_decision, next_decision, occupied, goal_per_agents, env);
+            //Warm up plan
+            int warm_idx = step - 1;
+
+            bool all_from_warm = true;
+            for (int a :non_disabled_agents) {
+                if(!warm_plan.empty() && warm_idx < warm_plan[a].size()) {
+                    int warm_loc = warm_plan[a][warm_idx];
+
+                    if (env->map[warm_loc] != -1) {
+                        next_states[a] = State(warm_loc,-1,-1);
+                        next_decision[warm_loc] = a;
+                    } else {
+                        all_from_warm = false;
+                    } 
+                } else {
+                    all_from_warm = false;
+
+                }
+            }
+
+            // Jalanin PIBT nya
+            if (!all_from_warm) {
+                for (int a : order) {
+                    // Skip kalau masih rotasi
+                    if (ps.decided[a].state == CustomAlgo::DONE::NOT_DONE) continue;
+    
+                    // Kalau belum punya lokasi selanjutnya
+                    if (next_states[a].location == -1) {
+                        pibt(a, -1, prev_states, next_states, prev_decision, next_decision, occupied, goal_per_agents, env);
+                    }
+    
                 }
 
             }
@@ -229,7 +255,7 @@ namespace CustomAlgo {
                 next_decision[cand.location] = curr_id;
 
                 // Kalau ada agen pada lokasi, dan belum pindah (rencanin)
-                if (prev_decision[cand.location] != -1 && next_states[prev_decision[cand.location]].location != -1) {
+                if (prev_decision[cand.location] != -1 && next_states[prev_decision[cand.location]].location == -1) {
                     int lower_id = prev_decision[cand.location];
                     if (!pibt(lower_id, curr_id, prev_states, next_states, prev_decision, next_decision, occupied, goal_per_agents, env)) {
 

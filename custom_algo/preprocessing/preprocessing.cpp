@@ -2,6 +2,9 @@
 #include <chrono>
 
 void Preprocessing::initialize(int preprocess_time_limit) {
+    env->rng.seed(0);
+    srand(0);
+
     // Fase 0 :Inisialisasi neighbor (Untuk getNeighborLocs(...))
     CustomAlgo::init_neighbor(env);
 

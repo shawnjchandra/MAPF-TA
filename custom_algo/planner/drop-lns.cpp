@@ -118,7 +118,7 @@ namespace CustomAlgo {
         float acc = 0.0f;
         for (int i = 0 ; i < (int)DestroyHeuristic::COUNT ; i++) {
             acc+= weights[i];
-            if ( random <= weights[i] ) return static_cast<DestroyHeuristic>(i);
+            if ( random <= acc ) return static_cast<DestroyHeuristic>(i);
         }
         
     }
@@ -148,7 +148,7 @@ namespace CustomAlgo {
        switch (h)
        {
        case DestroyHeuristic::RANDOM:
-            std::shuffle(candidates.begin(), candidates.end(), std::uniform_int_distribution<int>(rng(-INTERVAL_MAX,INTERVAL_MAX)));
+            std::shuffle(candidates.begin(), candidates.end(), env->rng );
 
            break;
        case DestroyHeuristic::AGENT_BASED:
@@ -169,7 +169,7 @@ namespace CustomAlgo {
             });
            break;
        case DestroyHeuristic::MAP_BASED:
-            int random_loc = rng(0,env->map.size() -1 );
+            int random_loc = CustomAlgo::rng(0,env->map.size() -1 );
             
             std::sort(candidates.begin(), candidates.end(), [&](int a, int b){
                 int dist_a = manhattanDistance(env->curr_states[a].location, random_loc,env);
@@ -204,6 +204,7 @@ namespace CustomAlgo {
         float soc = 0.0f;
         for (int a : non_disabled_agents) {
             if (plans[a].empty()) continue;
+
 
             int goal = env->goal_locations[a].empty() ? plans[a][0] : env->goal_locations[a].front().first;
         

@@ -7,9 +7,10 @@
 namespace CustomAlgo {
 
   std::vector<std::vector<int>> init_pibt_window (
-      std::vector<int> non_disabled_agents,
-      SharedEnvironment* env
-  );
+        std::vector<int> non_disabled_agents,
+        std::vector<std::vector<int>> warm_plan,
+        SharedEnvironment* env
+    );
 
   bool pibt(int curr_id,
             int higher_id,
