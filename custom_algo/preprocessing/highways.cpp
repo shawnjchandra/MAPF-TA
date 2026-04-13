@@ -112,7 +112,7 @@ namespace CustomAlgo{
             if (p == -1) {
                 return {};
             }
-            int orient = getOrientationBetween(p, cur);
+            int orient = getOrientationBetween(p, cur,env->cols);
             path.push_back({cur, orient});
             cur = p;
         }

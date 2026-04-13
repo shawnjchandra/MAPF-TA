@@ -183,13 +183,22 @@ namespace CustomAlgo{
 
         // Ganti dari (semua lokasi dalam cluster) ke (semua gates dalam cluster) untuk IntraHT
         std::vector<std::array<int, 4>> ht;
-        for (int c = 0; c < k; c++) {
-            for (int dest : env->hpa_h.Gates[c]) {
-                int dest_local = env->hpa_h.global_to_local[dest];
-                ht = build_IntraHT(env, c, dest);
+        // for (int c = 0; c < k; c++) {
+        //     for (int dest : env->hpa_h.Gates[c]) {
+        //         int dest_local = env->hpa_h.global_to_local[dest];
+        //         ht = build_IntraHT(env, c, dest);
 
-                env->hpa_h.IntraHT[c][dest_local] = std::vector<std::array<int,4>>(ht.begin(), ht.end());
+        //         env->hpa_h.IntraHT[c][dest_local] = std::vector<std::array<int,4>>(ht.begin(), ht.end());
   
+        //     }
+        // }
+        for (int c = 0; c < k; c++) {
+            int cluster_size = env->hpa_h.local_to_global[c].size();
+            for (int dest_local = 0; dest_local < cluster_size; dest_local++) {
+                int dest = env->hpa_h.local_to_global[c][dest_local];
+                auto ht = build_IntraHT(env, c, dest);
+                env->hpa_h.IntraHT[c][dest_local] = 
+                    std::vector<std::array<int,4>>(ht.begin(), ht.end());
             }
         }
     }
@@ -243,7 +252,7 @@ namespace CustomAlgo{
             for (int v_loc : env->hpa_h.AG.neighbors[u_loc]) {  //Setiap tetangganya (1-2 seharusnya)
 
                 int w;
-                int orient = getOrientationBetween(u_loc, v_loc); 
+                int orient = getOrientationBetween(u_loc, v_loc, env->cols); 
                
                 if (env->hpa_h.hw.r_e_hw.count({u_loc, orient}))   {// Kalau berlawanan arah highway
                     w = env->c_penalty;

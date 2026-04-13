@@ -10,7 +10,7 @@
 
 namespace CustomAlgo{
     
-    
+
 
     void cluster_indexing(SharedEnvironment* env);
     

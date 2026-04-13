@@ -116,6 +116,7 @@ int main(int argc, char **argv)
     planner->env->r         = vm["radius"].as<int>();
     planner->env->c_penalty = vm["cPenalty"].as<int>();
     planner->env->max_hw = vm["limitNumHW"].as<int>();
+    planner->env->logger = logger;
 
     auto input_json_file = vm["inputFile"].as<std::string>();
     json data;

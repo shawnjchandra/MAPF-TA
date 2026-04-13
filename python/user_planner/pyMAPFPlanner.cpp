@@ -8,7 +8,7 @@ pyMAPFPlanner::pyMAPFPlanner():MAPFPlanner(){
     std::ifstream configFile("config.json");
     
     //default
-    std::cout<<"setting to default python path: ./python, ../python, ./build "<<std::endl;
+    std::// cout<<"setting to default python path: ./python, ../python, ./build "<<std::endl;
     sys.attr("path").attr("append")("./python");
     sys.attr("path").attr("append")("../python");
     sys.attr("path").attr("append")("./build");
@@ -19,7 +19,7 @@ pyMAPFPlanner::pyMAPFPlanner():MAPFPlanner(){
             configFile>>configData;
             if(configData.contains("python_path")){
                 std::string python_path=configData["python_path"];
-                std::cout<<"addinng "<<python_path<<" to system path"<<std::endl;
+                std::// cout<<"addinng "<<python_path<<" to system path"<<std::endl;
                 sys.attr("path").attr("append")(python_path);
             }
         }
@@ -28,13 +28,13 @@ pyMAPFPlanner::pyMAPFPlanner():MAPFPlanner(){
         }
     }
     
-    std::cout<<"trying to import pyMAPFPlanner module"<<std::endl;
+    std::// cout<<"trying to import pyMAPFPlanner module"<<std::endl;
     auto py_mapf_planner_module=pybind11::module_::import("pyMAPFPlanner");
 
-    std::cout<<"trying to create pyMAPFPlanner"<<std::endl;
+    std::// cout<<"trying to create pyMAPFPlanner"<<std::endl;
     py_planner=py_mapf_planner_module.attr("pyMAPFPlanner")(env);
 
-    std::cout<<"pyMAPF Planner Created!"<<std::endl;
+    std::// cout<<"pyMAPF Planner Created!"<<std::endl;
 }
 
 
@@ -45,7 +45,7 @@ pyMAPFPlanner::pyMAPFPlanner(SharedEnvironment *env): MAPFPlanner(env){
     std::ifstream configFile("config.json");
     
     //default
-    std::cout<<"setting to default python path: ./python, ../python, ./build "<<std::endl;
+    std::// cout<<"setting to default python path: ./python, ../python, ./build "<<std::endl;
     sys.attr("path").attr("append")("./python");
     sys.attr("path").attr("append")("../python");
     sys.attr("path").attr("append")("./build");
@@ -56,7 +56,7 @@ pyMAPFPlanner::pyMAPFPlanner(SharedEnvironment *env): MAPFPlanner(env){
             configFile>>configData;
             if(configData.contains("python_path")){
                 std::string python_path=configData["python_path"];
-                std::cout<<"addinng "<<python_path<<" to system path"<<std::endl;
+                std::// cout<<"addinng "<<python_path<<" to system path"<<std::endl;
                 sys.attr("path").attr("append")(python_path);
             }
         }
@@ -65,13 +65,13 @@ pyMAPFPlanner::pyMAPFPlanner(SharedEnvironment *env): MAPFPlanner(env){
         }
     }
     
-    std::cout<<"trying to import pyMAPFPlanner module"<<std::endl;
+    std::// cout<<"trying to import pyMAPFPlanner module"<<std::endl;
     auto py_mapf_planner_module=pybind11::module_::import("pyMAPFPlanner");
 
-    std::cout<<"trying to create pyMAPFPlanner"<<std::endl;
+    std::// cout<<"trying to create pyMAPFPlanner"<<std::endl;
     py_planner=py_mapf_planner_module.attr("pyMAPFPlanner")(env);
 
-    std::cout<<"pyMAPF Planner Created!"<<std::endl;
+    std::// cout<<"pyMAPF Planner Created!"<<std::endl;
 }
 
 
@@ -79,7 +79,7 @@ pyMAPFPlanner::pyMAPFPlanner(SharedEnvironment *env): MAPFPlanner(env){
 void pyMAPFPlanner::initialize(int preprocess_time_limit){
     pybind11::gil_scoped_release release;
     pybind11::gil_scoped_acquire acquire;
-    std::cout<<"pyMAPFPlanner begin to initialize"<<std::endl;
+    std::// cout<<"pyMAPFPlanner begin to initialize"<<std::endl;
     py_planner.attr("initialize")(preprocess_time_limit);
 
     // env=py_planner.attr("env").cast<SharedEnvironment*>();
@@ -89,7 +89,7 @@ void pyMAPFPlanner::initialize(int preprocess_time_limit){
 void pyMAPFPlanner::plan(int time_limit,std::vector<Action> &plan){
     pybind11::gil_scoped_release release;
     pybind11::gil_scoped_acquire acquire;
-    // std::cout<<"calling python planner"<<std::endl;
+    // std::// cout<<"calling python planner"<<std::endl;
 
     auto action_object=py_planner.attr("plan")(time_limit);
 

@@ -40,7 +40,7 @@ public:
     bool has_node(int id){
         if (id >= size)
         {
-            std::cout << "range out of memory pool size "<< id<<","<<index<<","<<size << std::endl;
+            std::// cout << "range out of memory pool size "<< id<<","<<index<<","<<size << std::endl;
             exit(1);
         }
         return nodes[id].label == label && nodes[id].id == id;
@@ -48,7 +48,7 @@ public:
     bool is_closed(int id){
         if (id >= size)
         {
-            std::cout << "range out of memory pool size "<< id<<","<<index<<","<<size << std::endl;
+            std::// cout << "range out of memory pool size "<< id<<","<<index<<","<<size << std::endl;
             exit(1);
         }
         if (nodes[id].label != label){
@@ -59,11 +59,11 @@ public:
     s_node* get_node(int id){
         if (id >= size)
         {
-            std::cout << "range out of memory pool size "<< id<<","<<index<<","<<size << std::endl;
+            std::// cout << "range out of memory pool size "<< id<<","<<index<<","<<size << std::endl;
             exit(1);
         }
         if (nodes[id].label != label || nodes[id].id == -1){
-            std::cout << "error node not generated yet" << std::endl;
+            std::// cout << "error node not generated yet" << std::endl;
             exit(1);
         }
         return &(nodes[id]);
@@ -71,11 +71,11 @@ public:
     void close_node(int id){
         if (id >= size)
         {
-            std::cout << "range out of memory pool size "<< id<<","<<index<<","<<size << std::endl;
+            std::// cout << "range out of memory pool size "<< id<<","<<index<<","<<size << std::endl;
             exit(1);
         }
         if (nodes[id].label != label || nodes[id].id == -1){
-            std::cout << "node not generated yet" << std::endl;
+            std::// cout << "node not generated yet" << std::endl;
             exit(1);
         }
         nodes[id].close();
@@ -83,14 +83,14 @@ public:
     s_node* generate_node(int id, int g, int h, int op_flow, int depth, int all_vertex_flow = 0){
         if (id >= size)
         {
-            std::cout << "range out of memory pool size "<< id<<","<<index<<","<<size << std::endl;
+            std::// cout << "range out of memory pool size "<< id<<","<<index<<","<<size << std::endl;
             exit(1);
         }
         
         if (nodes[id].label == label && nodes[id].id != -1){
-            std::cout << "node already generated " << id << ","<< is_ready()<< std::endl;
+            std::// cout << "node already generated " << id << ","<< is_ready()<< std::endl;
 
-            std::cout << "node already generated " << nodes[id].id<< std::endl;
+            std::// cout << "node already generated " << nodes[id].id<< std::endl;
             exit(1);
         }
         nodes[id].reset();
@@ -108,11 +108,11 @@ public:
     void free_node(int id){
         if (id >= size)
         {
-            std::cout << "range out of memory pool size "<< id<<","<<index<<","<<size << std::endl;
+            std::// cout << "range out of memory pool size "<< id<<","<<index<<","<<size << std::endl;
             exit(1);
         }
         if (nodes[id].id == -1){
-            std::cout << "node not generated yet" << std::endl;
+            std::// cout << "node not generated yet" << std::endl;
             exit(1);
         }
         nodes[id].reset();

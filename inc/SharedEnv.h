@@ -8,6 +8,8 @@
 
 #include <random>
 
+#include "Logger.h"
+
 typedef std::chrono::steady_clock::time_point TimePoint;
 typedef std::chrono::milliseconds milliseconds;
 typedef std::unordered_map<int, Task> TaskPool;
@@ -15,6 +17,7 @@ typedef std::unordered_map<int, Task> TaskPool;
 class SharedEnvironment
 {
 public:
+    Logger* logger = nullptr;
     int num_of_agents;
     int rows;
     int cols;
@@ -55,7 +58,6 @@ public:
 
     //Planning
     CustomAlgo::PlannerState planner_state;
-    int horizon;
     int m; //Jumlah thread Worker
     int N_prctg; // Neighborhood size percentage (LNS)
     float gamma; // Variabel untuk update weights dari DestroyHeuristics

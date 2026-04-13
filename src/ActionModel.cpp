@@ -36,12 +36,12 @@ bool ActionModelWithRotate::is_valid(const vector<State>& prev, const vector<Act
             (abs(next[i].location / cols - prev[i].location/cols) + abs(next[i].location % cols - prev[i].location %cols) > 1 ))
         {
             errors.push_back(make_tuple("unallowed move",i,-1,next[i].timestep));
-            logger->log_warning("Planner Error: unallowed move for agent " + std::to_string(i) + " from location " + std::to_string(prev[i].location) + " to location " + std::to_string(next[i].location),timestep+1);
+            logger->log_warning("Planner Error: unallowed move for agent " + std::to_string(i) + " from location " + std::to_string(prev[i].location) + " to location " + std::to_string(next[i].location)+ "--- wrapping around ",timestep+1);
             return false;
         }
         if (grid.map[next[i].location] == 1) {
             errors.push_back(make_tuple("unallowed move",i,-1,next[i].timestep));
-            logger->log_warning("Planner Error: unallowed move for agent " + std::to_string(i) + " from location " + std::to_string(prev[i].location) + " to location " + std::to_string(next[i].location),timestep+1);
+            logger->log_warning("Planner Error: unallowed move for agent " + std::to_string(i) + " from location " + std::to_string(prev[i].location) + " to location " + std::to_string(next[i].location) + " === crashing to a wall",timestep+1);
             return false;
         }
         

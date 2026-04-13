@@ -8,11 +8,11 @@ Grid::Grid(string fname)
     std::ifstream myfile ((fname).c_str());
     if (!myfile.is_open())
     {
-        cout << "Map file " << fname << " does not exist. " << std::endl;
+        // cout << "Map file " << fname << " does not exist. " << std::endl;
         exit(-1);
     }
 
-    // cout << "*** Loading map ***" << std::endl;
+    // // cout << "*** Loading map ***" << std::endl;
     clock_t t = std::clock();
     size_t pos = fname.rfind('.');  // position of the file extension
     map_name = fname.substr(0, pos);  // get the name without extension
@@ -66,6 +66,6 @@ Grid::Grid(string fname)
 
     myfile.close();
     double runtime = (std::clock() - t) / CLOCKS_PER_SEC;
-    // cout << "Map size: " << rows << "x" << cols;
-    // cout << "\tDone! (load time: " << runtime << " s)" << std::endl;
+    // // cout << "Map size: " << rows << "x" << cols;
+    // // cout << "\tDone! (load time: " << runtime << " s)" << std::endl;
 }

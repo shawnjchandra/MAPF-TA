@@ -23,7 +23,7 @@ public:
             {
                 if (grid.map[start_locs[i]] == 1)
                 {
-                    cout<<"error: agent "<<i<<"'s start location is an obstacle("<<start_locs[i]<<")"<<endl;
+                    // cout<<"error: agent "<<i<<"'s start location is an obstacle("<<start_locs[i]<<")"<<endl;
                     exit(0);
                 }
                 starts[i] = State(start_locs[i], 0, 0);

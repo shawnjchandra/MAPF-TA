@@ -32,6 +32,10 @@ include_directories("custom_algo")
 # Include semua biar ga perlu "../.."
 include_directories("custom_algo/preprocessing")
 include_directories("custom_algo/planner")
+include_directories("custom_algo/planner/LNS")
+include_directories("custom_algo/planner/PIBT")
+include_directories("custom_algo/planner/RHCR/interface")
+include_directories("custom_algo/planner/RHCR/main")
 include_directories("custom_algo/scheduler")
 
 file(GLOB SOURCES "src/*.cpp" 
@@ -39,6 +43,10 @@ file(GLOB SOURCES "src/*.cpp"
                     "custom_algo/preprocessing/*.cpp"
                     "custom_algo/planner/*.cpp"
                     "custom_algo/scheduler/*.cpp"
+                    "custom_algo/planner/LNS/*.cpp"
+                    "custom_algo/planner/PIBT/*.cpp"
+                    "custom_algo/planner/RHCR/interface/*.cpp"
+                    "custom_algo/planner/RHCR/main/*.cpp"
                     )
 
 

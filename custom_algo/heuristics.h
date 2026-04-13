@@ -7,6 +7,8 @@
 
 namespace CustomAlgo{
 
+    //     std::mutex intra_ht_mutex;
+    // std::mutex inter_cache_mutex;
 void init_heuristics(SharedEnvironment* env);
 
 void init_neighbor(SharedEnvironment* env);

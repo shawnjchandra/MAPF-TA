@@ -56,6 +56,9 @@ namespace CustomAlgo{
 			location(location), heuristic(heuristic), orientation(orientation), tie_breaker(tie_breaker) {};
 	};
 
+	
+    
+
 	struct HNode
 		{
 			int label;		
@@ -159,6 +162,12 @@ namespace CustomAlgo{
 		HPA_H() = default;
 	};
 
+	struct CandidateTask {
+		int task_id;
+		int loc;
+		int current_owener_makespan;
+	};
+
 	struct PlannerState{
 		int w;	//Planning horizon / window size
 		int h;  //Replan Period
@@ -176,6 +185,7 @@ namespace CustomAlgo{
 			float val = 0.0f;
 			int timestep = 0;
 		};
+
 		std::vector<PeakInfo> w_peak;
 
 		//Baseline weight = 1, asumsi lokasi pasti pernah sekali dilewatin / akan dilewatin
@@ -193,18 +203,6 @@ namespace CustomAlgo{
 		float k_base = 0.1f; 
 
 		int max_degree = 4;
-
-		//Plan dari window terakhir , plans[agt_id][step] = loc;
-		std::vector<std::vector<int>> current_plans;
-
-		// //Disabled Agents (lokasi dead-end). Dari paper, dan github. Jika exit dan entry hanya ada satu. Mencegah deadlock
-		// std::unordered_set<int> disabled;
-
-
-		//Data dari PIBT
-		std::vector<double> priorities;
-		std::vector<double> priorities_base;
-		std::vector<DCR> decided;
 	};
 
 	enum class DestroyHeuristic { AGENT_BASED, RANDOM, MAP_BASED, COUNT };

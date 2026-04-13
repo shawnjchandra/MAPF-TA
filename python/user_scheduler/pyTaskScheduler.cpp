@@ -7,7 +7,7 @@ pyTaskScheduler::pyTaskScheduler(SharedEnvironment* env): TaskScheduler(env)
     std::ifstream configFile("config.json");
     
     //default
-    std::cout<<"setting to default python path: ./python, ../python, ./build "<<std::endl;
+    std::// cout<<"setting to default python path: ./python, ../python, ./build "<<std::endl;
     sys.attr("path").attr("append")("./python");
     sys.attr("path").attr("append")("../python");
     sys.attr("path").attr("append")("./build");
@@ -18,7 +18,7 @@ pyTaskScheduler::pyTaskScheduler(SharedEnvironment* env): TaskScheduler(env)
             configFile>>configData;
             if(configData.contains("python_path")){
                 std::string python_path=configData["python_path"];
-                std::cout<<"addinng "<<python_path<<" to system path"<<std::endl;
+                std::// cout<<"addinng "<<python_path<<" to system path"<<std::endl;
                 sys.attr("path").attr("append")(python_path);
             }
         }
@@ -27,10 +27,10 @@ pyTaskScheduler::pyTaskScheduler(SharedEnvironment* env): TaskScheduler(env)
         }
     }
 
-    std::cout<<"trying to import pyTaskScheduler module"<<std::endl;
+    std::// cout<<"trying to import pyTaskScheduler module"<<std::endl;
     auto py_task_scheduler_module=pybind11::module_::import("pyTaskScheduler");
 
-    std::cout<<"trying to create pyTaskScheduler"<<std::endl;
+    std::// cout<<"trying to create pyTaskScheduler"<<std::endl;
     py_scheduler=py_task_scheduler_module.attr("pyTaskScheduler")(env);
 
 }
@@ -39,7 +39,7 @@ void pyTaskScheduler::initialize(int preprocess_time_limit)
 {
     pybind11::gil_scoped_release release;
     pybind11::gil_scoped_acquire acquire;
-    std::cout<<"pyTaskScheduler begin to initialize"<<std::endl;
+    std::// cout<<"pyTaskScheduler begin to initialize"<<std::endl;
     py_scheduler.attr("initialize")(preprocess_time_limit);
 
 }
@@ -49,7 +49,7 @@ void pyTaskScheduler::plan(int time_limit, std::vector<int> & proposed_schedule)
 {
     pybind11::gil_scoped_release release;
     pybind11::gil_scoped_acquire acquire;
-    // std::cout<<"calling python scheduler"<<std::endl;
+    // std::// cout<<"calling python scheduler"<<std::endl;
 
     auto proposed_schedule_object=py_scheduler.attr("plan")(time_limit);
 
