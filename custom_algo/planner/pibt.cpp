@@ -72,8 +72,7 @@ namespace CustomAlgo {
 
         assert(prev_loc >= 0 && prev_loc < (int)env->map.size());
 
-        // --- Sama seperti causalPIBT original:
-        // Agen root (higher_id == -1) kunci lokasi awalnya supaya tidak ada cycle.
+        // kunci lokasi awalnya supaya tidak ada cycle.
         if (higher_id == -1) {
             occupied[prev_loc] = true;
         }
@@ -124,9 +123,7 @@ namespace CustomAlgo {
         //Iterasi candidates 
         for (auto& cand : candidates) {
 
-            // Skip kalau lokasi dikunci (anti-cycle) —
-            // KECUALI: agen root boleh wait di tempatnya sendiri (occupied[prev_loc] di-set
-            // oleh dirinya sendiri di atas, tapi wait harus tetap diizinkan).
+            // Skip kalau lokasi dikunci, kecuali agen root boleh wait di tempatnya sendiri
             if (occupied[cand.location] &&
                 !(higher_id == -1 && cand.location == prev_loc))
                 continue;
@@ -136,30 +133,29 @@ namespace CustomAlgo {
                 assert(validateMove(prev_loc, cand.location, env));
             }
 
+            // Kalau seandaikan cand ga valid
             if (cand.location == -1) continue;
 
-            // Vertex conflict: lokasi sudah diklaim agen lain untuk timestep ini
+            // Vertex conflict
             if (decision[cand.location] != -1) continue;
 
-            // Swap conflict: agen higher_id ada di cand.location sekarang
+            // Swap conflict
             if (higher_id != -1 && prev_decision[cand.location] == higher_id) continue;
 
-            // Klaim lokasi ini
-            next_states[curr_id]      = State(cand.location, -1, cand.orientation);
-            decision[cand.location]   = curr_id;
+            // Ambil lokasi cand
+            next_states[curr_id] = State(cand.location, -1, cand.orientation);
+            decision[cand.location] = curr_id;
 
-            // Kalau ada agen lain di cand.location dan belum punya rencana → rekursif
+            // Kalau ada agen lain di cand.location dan belum punya rencana,  inheritance
             if (prev_decision[cand.location] != -1 &&
-                next_states[prev_decision[cand.location]].location == -1)
-            {
+                next_states[prev_decision[cand.location]].location == -1) {
                 int lower_id = prev_decision[cand.location];
                 if (!pibt(lower_id, curr_id,
                           prev_states, next_states,
                           prev_decision, decision,
-                          occupied, goal_per_agents, env, p))
-                {
-                    // Backtrack eksplisit (sama persis dengan causalPIBT original)
-                    next_states[curr_id]    = State(-1, -1, -1);
+                          occupied, goal_per_agents, env, p)) {
+                    // Backtrack
+                    next_states[curr_id] = State(-1, -1, -1);
                     decision[cand.location] = -1;
                     continue;
                 }
@@ -168,7 +164,7 @@ namespace CustomAlgo {
             return true;
         }
 
-        // Semua kandidat gagal → wait paksa di tempat
+        // Semua kandidat gagal, wait paksa di tempat
         next_states[curr_id]  = State(prev_loc, -1, prev_orient);
         decision[prev_loc]    = curr_id;
 
@@ -178,6 +174,7 @@ namespace CustomAlgo {
         return false;
     }
 
+    //Ambil dari framework
     bool moveCheck(
         int id,
         std::vector<bool>& checked,
@@ -206,4 +203,4 @@ namespace CustomAlgo {
         return false;
     }
 
-} // namespace CustomAlgo
+}

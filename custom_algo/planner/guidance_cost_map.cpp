@@ -13,19 +13,6 @@ namespace CustomAlgo {
         }
     }
 
-    // void gcm_update(SharedEnvironment* env, int loc, int orient, int curr_timestep) {
-    //     auto& ps = env->planner_state;
-
-    //     // Direct congestion signal: agent presence = 1.0, absence decays naturally
-    //     float w = (1.0f - env->alpha) * ps.gcm[loc][orient] + env->alpha * 1.0f;
-    //     ps.gcm[loc][orient] = w;
-
-    //     if (w > ps.w_peak[loc].val) {
-    //         ps.w_peak[loc].val      = w;
-    //         ps.w_peak[loc].timestep = curr_timestep;
-    //     }
-    // }
-
     void gcm_cooldown(SharedEnvironment* env, int curr_timestep){
         auto& ps = env->planner_state;
 
@@ -40,10 +27,9 @@ namespace CustomAlgo {
             
             cooled = max(ps.w_baseline, cooled);
             
-            // for (int orient = 0 ; orient < 4 ; orient++) ps.gcm[loc][orient] = cooled;
             for (int orient = 0; orient < 4; orient++) {
                 float curr = ps.gcm[loc][orient];
-                // Pull toward cooled but don't snap — preserves per-orient signal
+
                 ps.gcm[loc][orient] = max(ps.w_baseline,
                     curr > cooled ? cooled : curr);
             }

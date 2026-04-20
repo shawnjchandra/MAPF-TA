@@ -54,6 +54,8 @@ namespace CustomAlgo {
 
         ps.current_plans.assign(agent_size, {});
 
+        //Bagian bawah, ngikutin framework (Untuk PIBT)
+
         p.resize(agent_size);
         decision.resize(map_size, -1);
         prev_states.resize(agent_size);
@@ -85,17 +87,12 @@ namespace CustomAlgo {
         if (pibt_time <= 0) pibt_time = 1;
 
         // end_time dipertahankan untuk kompatibilitas dengan drop-lns jika dipakai nanti
-        TimePoint end_time = start_time + std::chrono::milliseconds(
-            max(0, time_limit - pibt_time - LNS_TIMELIMIT_TOLERANCE));
-
         auto& ps = env->planner_state;
 
         // --- Reset per-timestep state ---
         prev_decision.assign(env->map.size(), -1);
-        // Reset decision sepenuhnya; NOT_DONE agents akan re-claim di loop setup bawah
         decision.assign(env->map.size(), -1);
 
-        // --- Setup state per agen ---
         for (int a = 0; a < env->num_of_agents; a++) {
 
             assert(env->curr_states[a].location >= 0);
@@ -123,21 +120,19 @@ namespace CustomAlgo {
             }
 
             // Update goal
-            goal_per_agent[a] = env->goal_locations[a].empty()
-                ? prev_states[a].location
-                : env->goal_locations[a].front().first;
+            goal_per_agent[a] = env->goal_locations[a].empty() ? prev_states[a].location : env->goal_locations[a].front().first;
 
-            // --- Update priorities (port dari original framework) ---
+            // --- Update priorities (pakai dari original framework) ---
             bool is_at_goal = (prev_states[a].location == goal_per_agent[a]);
 
             if (env->goal_locations[a].empty()) {
-                // Tidak ada goal → reset ke base priority (sama dengan original)
+                // Tidak ada goal = reset ke base priority (sama dengan original)
                 p[a] = p_copy[a];
             } else if (is_at_goal) {
-                // Sudah di goal → reset ke base priority
+                // Sudah di goal = reset ke base priority
                 p[a] = p_copy[a];
             } else {
-                // Belum sampai → naikkan priority (original: local_priority[i] += 1)
+                // Belum sampai = naikkan priority 
                 p[a] += 1.0;
             }
 
@@ -148,16 +143,14 @@ namespace CustomAlgo {
             }
         }
 
-        // --- Sort DESCENDING (bug fix: versi kamu sort ascending → agen prioritas
-        //     rendah duluan, kebalikan dari yang seharusnya) ---
+        // sort descending, utamain yang priority tinggi
         std::sort(ids.begin(), ids.end(), [&](int a, int b) {
-            return p[a] > p[b];  // descending, sama dengan original
+            return p[a] > p[b];  
         });
 
-        // --- Reset occupied setiap timestep (sama dengan original) ---
         std::fill(occupied.begin(), occupied.end(), false);
 
-        // --- Jalankan PIBT per agen sesuai urutan prioritas ---
+        // Jalankan PIBT
         for (int i : ids) {
             // Skip agen yang masih dalam proses rotasi
             if (decided[i].state == DONE::NOT_DONE) continue;
@@ -171,19 +164,18 @@ namespace CustomAlgo {
             }
         }
 
-        // --- Extract actions (port dari original framework) ---
+        // Extract actions 
         actions.resize(env->num_of_agents);
         for (int id : ids) {
-            // Bebaskan slot decision yang sudah di-assign ke next_states
+            // Bebaskan slot decision yang sudah diassign ke next_states
             if (next_states[id].location != -1)
                 decision[next_states[id].location] = -1;
 
-            // Update decided kalau agen benar-benar bergerak
+            // Update decided kalau agen gerak
             if (next_states[id].location >= 0)
                 decided[id] = DCR({next_states[id].location, DONE::NOT_DONE});
 
-            // Safety: kalau decided.loc masih -1 (seharusnya tidak terjadi setelah
-            // setup di atas, tapi jaga-jaga), paksa wait di lokasi sekarang
+            // safety net, seharusnya ga sih
             if (decided[id].loc == -1) {
                 decided[id] = DCR({prev_states[id].location, DONE::DONE});
             }
@@ -192,7 +184,7 @@ namespace CustomAlgo {
             checked[id] = false;
         }
 
-        // --- moveCheck: validasi tidak ada forward move yang blokir satu sama lain ---
+        // moveCheck smua agen, validasi tidak ada forward move yang blokir satu sama lain 
         for (int id = 0; id < env->num_of_agents; id++) {
             if (!checked[id] && actions[id] == Action::FW) {
                 moveCheck(id, checked, decided, actions, prev_decision);
@@ -202,7 +194,7 @@ namespace CustomAlgo {
         
         gcm_cooldown(env, env->curr_timestep);
 
-        // --- GCM update ---
+        // GCM update 
         for (int a : ids) {
             gcm_update(env,
                        env->curr_states[a].location,
@@ -228,4 +220,4 @@ namespace CustomAlgo {
         return disabled;
     }
 
-} // namespace CustomAlgo
+} 

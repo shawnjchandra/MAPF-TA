@@ -242,64 +242,14 @@ namespace CustomAlgo{
     }
 
     /**
-     * @brief Dijkstra untuk InterHT. Mencari jalur terdekat antar gate-gate di cluster tujuan, dengan gate dari gate_idx. O(P x G_c)
+     * @brief Dijkstra untuk InterHT. Mencari jalur terdekat antar gate-gate di cluster tujuan, dengan gate dari gate_idx. O(P x G_c).
+     * 
+     * Expanded Gates, intinya setiap Gate hanya dimasukin sekali, walaupun suboptimal hasilnya
+     * 
      * 
      * @param env 
      * @param gate_idx 
      */
-    // void compute_inter_from(SharedEnvironment* env, int gate_idx) {
-    //     int gates_size = env->hpa_h.AG.gates.size();
-    //     std::vector<int> dist(gates_size, INTERVAL_MAX);
-        
-    //     std::priority_queue<HNode> pq;
-    //     pq.push(HNode::createForInterHT(0, gate_idx));
-        
-    //     dist[gate_idx] = 0;
-
-    //     std::unordered_set<int> expanded_clusters;
-
-    //     while (!pq.empty()) { //Dijkstra
-    //         HNode curr = pq.top();
-    //         pq.pop();
-    //         int d = curr.value;
-    //         int u = curr.idx;
-
-    //         if (d > dist[u]) continue;
-
-    //         int u_loc     = env->hpa_h.AG.gates[u];
-    //         int u_cluster = env->hpa_h.voronoi_map[u_loc];
-    //         int u_local   = env->hpa_h.global_to_local[u_loc];
-
-    //         for (int v_loc : env->hpa_h.AG.neighbors[u_loc]) {  //Setiap tetangganya (1-2 seharusnya)
-
-    //             int w;
-    //             int orient = getOrientationBetween(u_loc, v_loc); 
-               
-    //             if (env->hpa_h.hw.r_e_hw.count({u_loc, orient}))   {// Kalau berlawanan arah highway
-    //                 w = env->c_penalty;
-    //             } else {
-    //                 if (env->hpa_h.AG.inter.count({u_loc, v_loc})) { //Kalau termasuk diluar cluster
-    //                     w = env->hpa_h.AG.inter[{u_loc, v_loc}];
-    //                 } else {                                           //Kalau dalam cluster
-    //                     w = env->hpa_h.AG.intra[{u_loc, v_loc}];
-    //                 }
-    //             }
-                
-    //             int v = env->hpa_h.AG.gate_index[v_loc];
-    //             if (v == INTERVAL_MAX) continue;
-
-    //             int nd = dist[u] + w;
-    //             if (nd < dist[v]) {
-    //                 dist[v] = nd;
-    //                 pq.push(HNode::createForInterHT(nd, v));
-    //             }
-    //         }
-
-    //     }
-        
-    //     env->hpa_h.inter_cache[gate_idx] = dist;
-    // }
-
     void compute_inter_from(SharedEnvironment* env, int gate_idx) {
         int gates_size = env->hpa_h.AG.gates.size();
         std::vector<int> dist(gates_size, INTERVAL_MAX);
@@ -310,16 +260,19 @@ namespace CustomAlgo{
         std::unordered_set<int> expanded_gates;
 
         while (!pq.empty()) {
-            HNode curr = pq.top(); pq.pop();
+            HNode curr = pq.top(); 
+            pq.pop();
             int d = curr.value;
             int u = curr.idx;
+
             if (d > dist[u]) continue;
 
             int u_loc     = env->hpa_h.AG.gates[u];
+
             int u_cluster = env->hpa_h.voronoi_map[u_loc];
             int u_local   = env->hpa_h.global_to_local[u_loc];
 
-            // INTRA — only once per gate
+            //Intra
             if (expanded_gates.insert(u).second) {
                 for (int g2 : env->hpa_h.Gates[u_cluster]) {
                     
@@ -368,40 +321,6 @@ namespace CustomAlgo{
         env->hpa_h.inter_cache[gate_idx] = dist;
     }
 
-    // void compute_cluster_from(SharedEnvironment* env, int c_src) {
-    //     int k = env->k;
-    //     std::vector<int> dist(k, INTERVAL_MAX);
-    //     std::priority_queue<std::pair<int,int>, std::vector<std::pair<int,int>>, std::greater<>> pq;
-    //     dist[c_src] = 0;
-    //     pq.push({0, c_src});
-        
-    //     while (!pq.empty()) {
-    //         auto [d, u] = pq.top(); pq.pop();
-    //         if (d > dist[u]) continue;
-    //         for (auto& [v, w] : env->hpa_h.cluster_adj[u]) {
-    //             int nd = d + w;
-    //             if (nd < dist[v]) { dist[v] = nd; pq.push({nd, v}); }
-    //         }
-    //     }
-    //     env->hpa_h.cluster_cache[c_src] = dist;
-    // }
-
-    // /**
-    //  * @brief Warmup inter cache. Membuat InterHT hanya untuk cluster yang ditempati oleh agen sejak pertama kali dimasukkan.
-    //  * 
-    //  * @param env 
-    //  */
-    // void warmup_inter_cache(SharedEnvironment* env) {
-    //     std::set<int> agent_clusters;
-    //     for (int loc : env->agent_starts) {
-    //         int c = env->hpa_h.voronoi_map[loc];
-    //         agent_clusters.insert(c);
-    //     }
-        
-    //     // Untuk setiap cluster yang ditempat, buat interHT nya
-    //     for (int c = 0; c < env->k; c++) compute_cluster_from(env, c);
-    // }
-
     void warmup_inter_cache(SharedEnvironment* env) {
         std::set<int> agent_clusters;
         for (int loc : env->agent_starts) {
@@ -409,172 +328,48 @@ namespace CustomAlgo{
             agent_clusters.insert(c);
         }
 
-        auto t_plan_start = std::chrono::steady_clock::now();
-        auto elapsed = [&]() {
-            return std::chrono::duration<double, std::milli>(
-                std::chrono::steady_clock::now() - t_plan_start).count();
-        };
-
         int gates_size = env->hpa_h.Gates.size();
+
         // Untuk setiap cluster yang ditempat, buat interHT nya
         for (int c : agent_clusters){
             for (int g : env->hpa_h.Gates[c]){
                 int g_idx = env->hpa_h.AG.gate_index[g];
                 if(g_idx == INTERVAL_MAX || env->hpa_h.inter_cache.count(g_idx)) continue;
 
-                std::cout << "[WARMUP] calling compute_inter_from gate_idx=" << g_idx << std::flush;
-                auto t0 = std::chrono::steady_clock::now();
-
                 compute_inter_from(env, g_idx);
-                
-                double ms = std::chrono::duration<double, std::milli>(
-                    std::chrono::steady_clock::now() - t0).count();
-                std::cout << " done in " << ms << "ms" << std::endl;
             }
         }
     }
 
     void generate_HPAHMap(SharedEnvironment* env, std::vector<int> centroids) {
-        auto _phase_start = std::chrono::steady_clock::now();
-        auto elapsed_ms = [&]() {
-            return std::chrono::duration<double, std::milli>(
-                std::chrono::steady_clock::now() - _phase_start).count();
-        };
-        auto log_step = [&](const std::string& label, double ms) {
-            std::cout << "[PREPROCESS]   " << label << " : " << ms << " ms"
-                    << "  (cumulative: " << elapsed_ms() << " ms)" << std::endl;
-        };
-    
-        std::cout << "[PREPROCESS] --- generate_HPAHMap START ---" << std::endl;
-    
+
         // Step 1 : cluster_indexing
-        {
-            auto t0 = std::chrono::steady_clock::now();
-            cluster_indexing(env);
-            double ms = std::chrono::duration<double, std::milli>(
-                std::chrono::steady_clock::now() - t0).count();
-            log_step("Step 1 | cluster_indexing", ms);
-        }
-    
+        cluster_indexing(env);
+
         // Step 2a : build_entrances
-        {
-            auto t0 = std::chrono::steady_clock::now();
-            build_entrances(env);
-            double ms = std::chrono::duration<double, std::milli>(
-                std::chrono::steady_clock::now() - t0).count();
-            log_step("Step 2a | build_entrances", ms);
-            // Log gate/entrance counts if accessible
-            if (env->hpa_h.AG.gates.size() > 0) {
-                std::cout << "[PREPROCESS]   -> Gates count : " << env->hpa_h.AG.gates.size() << std::endl;
-            }
-        }
-        // // Step 2- build cluster graph
-        // {
-        //     auto t0 = std::chrono::steady_clock::now();
-        //     build_cluster_graph(env);
-        //     double ms = std::chrono::duration<double, std::milli>(
-        //         std::chrono::steady_clock::now() - t0).count();
-        //     log_step("Step 2---- | build cluster graph", ms);
-        // }
-    
+        build_entrances(env);
+        
         // Step 2b : build_abstract_graph (1st pass, no highway)
-        {
-            auto t0 = std::chrono::steady_clock::now();
-            build_abstract_graph(env);
-            double ms = std::chrono::duration<double, std::milli>(
-                std::chrono::steady_clock::now() - t0).count();
-            log_step("Step 2b | build_abstract_graph (1st, pre-highway)", ms);
-            if (ms > 5000) {
-                std::cerr << "[PREPROCESS]   WARNING: build_abstract_graph (1st) took " << ms
-                        << " ms — this is the known bottleneck (IntraHT per gate per cluster)." << std::endl;
-            }
-        }
+        build_abstract_graph(env);
     
         // Step 2c : build_InterHT (1st pass)
-        {
-            auto t0 = std::chrono::steady_clock::now();
-            build_InterHT(env);
-            double ms = std::chrono::duration<double, std::milli>(
-                std::chrono::steady_clock::now() - t0).count();
-            log_step("Step 2c | build_InterHT (1st, lazy)", ms);
-        }
-    
+        build_InterHT(env);
+        
         // Step 3 : generateHighways
-        {
-            auto t0 = std::chrono::steady_clock::now();
-            generateHighways(env, centroids);
-            double ms = std::chrono::duration<double, std::milli>(
-                std::chrono::steady_clock::now() - t0).count();
-            log_step("Step 3 | generateHighways", ms);
-            // Log highway edge count if accessible
-            // if (env->r_e_hw.size() > 0) {
-            //     std::cout << "[PREPROCESS]   -> Highway reverse-edges count : "
-            //               << env->r_e_hw.size() << std::endl;
-            // }
-        }
+        generateHighways(env, centroids);
+
     
         // Step 4a : build_abstract_graph (2nd pass, with highway)
-        {
-            auto t0 = std::chrono::steady_clock::now();
-            build_abstract_graph(env);
-            double ms = std::chrono::duration<double, std::milli>(
-                std::chrono::steady_clock::now() - t0).count();
-            log_step("Step 4a | build_abstract_graph (2nd, post-highway)", ms);
-            if (ms > 5000) {
-                std::cerr << "[PREPROCESS]   WARNING: build_abstract_graph (2nd) took " << ms
-                        << " ms — check if R_E_HW penalty is causing extra work." << std::endl;
-            }
-        }
-
-         if (env->hpa_h.AG.gates.size() > 0) {
-                std::cout << "[PREPROCESS]   -> Gates count : " << env->hpa_h.AG.gates.size() << std::endl;
-            }
+        build_abstract_graph(env);
+        
     
         // Step 4b : build_InterHT (2nd pass)
-        {
-            auto t0 = std::chrono::steady_clock::now();
-            build_InterHT(env);
-            double ms = std::chrono::duration<double, std::milli>(
-                std::chrono::steady_clock::now() - t0).count();
-            log_step("Step 4b | build_InterHT (2nd, lazy)", ms);
-        }
-    
+        build_InterHT(env);
+     
         // Step 5 : warmup_inter_cache
-        {
-            auto t0 = std::chrono::steady_clock::now();
-            warmup_inter_cache(env);
-            double ms = std::chrono::duration<double, std::milli>(
-                std::chrono::steady_clock::now() - t0).count();
-            log_step("Step 5 | warmup_inter_cache", ms);
-            if (ms > 2000) {
-                std::cerr << "[PREPROCESS]   WARNING: warmup_inter_cache took " << ms
-                        << " ms — number of agent-cluster gates may be large." << std::endl;
-            }
-        }
     
-        std::cout << "[PREPROCESS] --- generate_HPAHMap END | total : "
-                << elapsed_ms() << " ms ---" << std::endl;
+        warmup_inter_cache(env);
+  
     }
 
-    // void generate_HPAHMap(SharedEnvironment* env, std::vector<int> centroids) {
-    //     // Step 0 : Inisialisasi vector neighbor, menyimpan setiap lokasi neighbor dari setiap usable cell
-    //     // CustomAlgo::init_neighbor(env);
-
-    //     //Step 1 : Index semua cluster
-    //     cluster_indexing(env);
-
-    //     // Step 2 : Bikin HPA pertama
-    //     build_entrances(env);
-    //     build_abstract_graph(env);
-    //     build_InterHT(env);
-    
-    //     // Step 3 : Generate Highways
-    //     generateHighways(env, centroids);
-
-    //     // Step 4 : HPA + Highways, Perubahan dari pseudocode: r_e_hw disimpan dalam env
-    //     build_abstract_graph(env);    
-    //     build_InterHT(env);
-        
-    //     warmup_inter_cache(env);
-    // }
 }

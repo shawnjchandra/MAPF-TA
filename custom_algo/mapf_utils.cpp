@@ -19,63 +19,7 @@ namespace CustomAlgo{
         return true;
     };
 
-    void getNeighbors(const SharedEnvironment* env, std::vector<std::pair<int,int>>& neighbors, int location,int direction) {
-        neighbors.clear();
-        //forward
-        assert(location >= 0 && location < env->map.size());
-        int candidates[4] = { location + 1,location + env->cols, location - 1, location - env->cols};
-        int forward = candidates[direction];
-        int new_direction = direction;
-        assert(forward!=location);
 
-        #ifndef NDEBUG
-                std::cout<<"forward: "<<forward<<std::endl;
-        #endif
-        if (validateMove(location, forward, env)	){
-            #ifndef NDEBUG
-                std::cout<<"forward yes"<<std::endl;
-            #endif
-            neighbors.emplace_back(std::make_pair(forward,new_direction));
-        }
-        //turn left
-        new_direction = direction-1;
-        if (new_direction == -1)
-            new_direction = 3;
-        assert(new_direction >= 0 && new_direction < 4);
-        neighbors.emplace_back(std::make_pair(location,new_direction));
-        //turn right
-        new_direction = direction+1;
-        if (new_direction == 4)
-            new_direction = 0;
-        assert(new_direction >= 0 && new_direction < 4);
-        neighbors.emplace_back(std::make_pair(location,new_direction));
-        neighbors.emplace_back(std::make_pair(location,direction)); //wait
-    };
-
-    void getNeighbors_nowait(const SharedEnvironment* env, std::vector<std::pair<int,int>>& neighbors, int location,int direction) {
-        neighbors.clear();
-        //forward
-        assert(location >= 0 && location < env->map.size());
-        int candidates[4] = { location + 1,location + env->cols, location - 1, location - env->cols};
-        int forward = candidates[direction];
-        int new_direction = direction;
-        if (validateMove(location, forward, env)){
-            assert(forward >= 0 && forward < env->map.size());
-            neighbors.emplace_back(std::make_pair(forward,new_direction));
-        }
-        //turn left
-        new_direction = direction-1;
-        if (new_direction == -1)
-            new_direction = 3;
-        assert(new_direction >= 0 && new_direction < 4);
-        neighbors.emplace_back(std::make_pair(location,new_direction));
-        //turn right
-        new_direction = direction+1;
-        if (new_direction == 4)
-            new_direction = 0;
-        assert(new_direction >= 0 && new_direction < 4);
-        neighbors.emplace_back(std::make_pair(location,new_direction));
-    };
 
     int manhattanDistance(int loc, int loc2,const SharedEnvironment* env){
         int loc_row = loc/env->cols;
@@ -93,38 +37,6 @@ namespace CustomAlgo{
         neighbors = ns->at(location);
         return;
 
-    }
-
-    void getNeighborLocs(const Neighbors* ns, int neighbors[], int location) {
-        //forward
-        int size = 4;
-        assert(location >= 0 && location < ns->size());
-
-        for (int i = 0; i < size; i++) {
-            if (i < ns->at(location).size()){
-                neighbors[i] = ns->at(location)[i];
-            }
-            else
-                neighbors[i] = -1;
-        }
-
-    }
-
-    Action getAction(State& prev, State& next){
-        if (prev.location == next.location && prev.orientation == next.orientation){
-            return Action::W;
-        }
-        if (prev.location != next.location && prev.orientation == next.orientation){
-            return Action::FW;
-        }
-        if (next.orientation  == (prev.orientation+1)%4){
-            return Action::CR;
-        }
-        if (next.orientation  == (prev.orientation+3)%4){
-            return Action::CCR;
-        }
-        assert(false);
-        return Action::W;
     }
 
     Action getAction(State& prev, int next_loc, SharedEnvironment* env){

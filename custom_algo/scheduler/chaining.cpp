@@ -6,16 +6,13 @@
 
 namespace CustomAlgo {
     void chaining_task(std::vector<int>& opened_agt ,SharedEnvironment* env , std::vector<int>& proposed_schedule, double gamma, std::unordered_set<int>& reserved_set, std::unordered_set<int>& free_tasks) {
-        auto t_start = std::chrono::steady_clock::now();
+       
 
         std::unordered_map<int,int> loc_to_task;        
         
         std::unordered_set<int> removed_task;
         removed_task.reserve(opened_agt.size());
 
-        int chained_count = 0;
-        int skipped_no_task = 0;
-        int skipped_no_improvement = 0;
 
         // Daftarin task yang belum diopened dan belum dikasihin ke agen lain 
         for(int t_id: free_tasks) {
@@ -29,7 +26,6 @@ namespace CustomAlgo {
 
             
             loc_to_task[t.locations.front()] = t.task_id;
-    
         }
             
         for (int agt_id : opened_agt) {
@@ -40,21 +36,10 @@ namespace CustomAlgo {
 
             
             auto curr_task_it = env->task_pool.find(curr_task_id);
-            if (curr_task_it == env->task_pool.end()) {
-                skipped_no_task++;
-                continue;
-            }
-
+            if (curr_task_it == env->task_pool.end()) continue;
+            
             //Ambil goal location (second errand) dari task sekarang 
             int curr_task_goal = curr_task_it->second.locations.back();
-
-            
-            //Ambil makespan dari env, ga perlu hitung query lagi karena udah pasti ada task dan disimpan dari DTR
-            // auto ms_it = env->makespan.find(curr_task_id);
-            // if (ms_it == env->makespan.end()) continue;
-
-            
-            // int curr_makespan = ms_it->second;
 
             int best_chained_task = -1;
             int best_chain_cost = INTERVAL_MAX;
@@ -114,27 +99,12 @@ namespace CustomAlgo {
 
                 env->reserved_task_schedule[agt_id] = best_chained_task;
                 env->dbc_reserved[agt_id] = true;
-                // env->makespan[best_chained_task] = best_chain_cost;
 
-                chained_count++;
-                // proposed_schedule[agt_id] = best_chained_task;
-            } else {
-                skipped_no_improvement++;
-            }
-         }
+            } 
+        }
 
         for (int t_id : removed_task) {
             free_tasks.erase(t_id);
         }
-
-        double ms = std::chrono::duration<double, std::milli>(
-        std::chrono::steady_clock::now() - t_start).count();
-        std::cout << "[SCHEDULE][DBC] t=" << env->curr_timestep
-              << " opened_agents=" << opened_agt.size()
-              << " chained=" << chained_count
-              << " skipped_no_task=" << skipped_no_task
-              << " skipped_no_improvement=" << skipped_no_improvement
-              << " time=" << ms << "ms" << std::endl;
-
     }
 }

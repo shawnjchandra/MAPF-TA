@@ -23,45 +23,6 @@ namespace CustomAlgo {
      * 
      */
 
-    void update_makespan(SharedEnvironment* env, std::vector<int> agt_dtr) {
-        // for (int agt_id : agt_dtr) {
-        //     int t_id = env->curr_task_schedule[agt_id];
-        //     if (t_id == -1) continue;
-        //     env->makespan.erase(t_id);  
-        // }
-
-        // for (int agt_id : agt_dtr) {
-            
-        //     int t_id = env->curr_task_schedule[agt_id];
-        //     if (t_id == -1 ) continue; 
-
-            
-        //     auto task_it = env->task_pool.find(t_id);
-        //     if (task_it == env->task_pool.end()) continue;
-
-        //     auto& t = task_it->second; 
-
-        //     auto& agent_state = env->curr_states[agt_id];
-        //     int c_loc = agent_state.location;
-        //     int c_orient = agent_state.orientation;
-
-        //     int makespan = 0;
-        //     for (int idx_loc = t.idx_next_loc ; idx_loc < t.locations.size() ; idx_loc++) {
-        //         int er_loc = t.locations.at(idx_loc);
-        //         makespan += query_heuristic(env, c_loc, c_orient, er_loc );
-        //         if (makespan >= INTERVAL_MAX) {
-        //             makespan = INTERVAL_MAX;
-        //             break;
-        //         }
-        //         c_loc = er_loc;
-        //     }
-
-        //      if (makespan < INTERVAL_MAX) env->makespan[t_id] = makespan;
-        // }
-
-
-    }
-
     void get_newly_completed_tasks(SharedEnvironment* env, std::vector<int>& proposed_schedule, std::unordered_set<int>& reserved_set) {
 
             if (env->curr_timestep == 0) return;
@@ -86,14 +47,6 @@ namespace CustomAlgo {
     }
 
     void schedule_plan(int preprocess_time_limit, std::vector<int> & proposed_schedule, SharedEnvironment* env) {
-        auto t_plan_start = std::chrono::steady_clock::now();
-        auto elapsed = [&]() {
-            return std::chrono::duration<double, std::milli>(
-                std::chrono::steady_clock::now() - t_plan_start).count();
-        };
-
-    
-
         std::unordered_set<int> reserved_set;
         reserved_set.insert(env->reserved_task_schedule.begin(), env->reserved_task_schedule.end());
         reserved_set.erase(-1);
@@ -117,11 +70,9 @@ namespace CustomAlgo {
             }
         }
             
-        
         for (int t_id : not_opened_tasks) {
             env->makespan.erase(t_id);
         }
-            // std::sort(sorted_tasks.begin(), sorted_tasks.end());
 
         get_newly_completed_tasks(env, proposed_schedule, reserved_set);
 
@@ -150,27 +101,22 @@ namespace CustomAlgo {
             if (gamma < 0.0) gamma = 0;
         }
 
+        /**
+         * @brief Bagian utama, ambil agen sesuai kondisi masing-masing
+         * 
+         */
         std::vector<int> agt_dtr;
         std::vector<int> opened_agt;
 
         // Reserve kapasistas sesuai jumlah agen
         agt_dtr.reserve(env->num_of_agents);
         opened_agt.reserve(env->num_of_agents);
-
-               //Untuk O(1) lookup task yang udah di reserved
         
-
         for (int agt_id =0 ; agt_id < env->num_of_agents; agt_id++) {
             //Agen -> task | idx -> value
             
             if (free_agents.find(agt_id) != free_agents.end()) {
 
-                // Pastiin makespan dari agen yang ga punya tugas itu  atau ga ada
-                // int curr_task = env->curr_task_schedule[agt_id];
-                // if (curr_task != -1) {
-                //     env->makespan.erase(curr_task);
-                // }
-                
                 //Kalo agen punya reserved dan lagi ga ngerjain task
                 if (env->reserved_task_schedule[agt_id] != -1) {
                     int reserved_t_id = env->reserved_task_schedule[agt_id];
@@ -210,97 +156,15 @@ namespace CustomAlgo {
         }
 
 
-        update_makespan(env, agt_dtr);
-
+        //Update square density masing-masing cluster
         calc_square_density(env);
 
-
- 
-
-            std::cout << "[SCHEDULE] t=" << env->curr_timestep << " DTR START"
-              << " agt_dtr=" << agt_dtr.size()
-              << " not_opened_tasks=" << not_opened_tasks.size()
-              << " elapsed=" << elapsed() << "ms" << std::endl;
-
-        
-
         // DTR
-        auto t0 = std::chrono::steady_clock::now();
-
         schedule_tasks(agt_dtr, env, proposed_schedule, gamma, reserved_set, not_opened_tasks);
-        // schedule_tasks(agt_dtr, env, proposed_schedule, gamma, reserved_set, not_opened_tasks, sorted_tasks);
 
-        double ms = std::chrono::duration<double, std::milli>(
-            std::chrono::steady_clock::now() - t0).count();
-        std::cout << "[SCHEDULE] t=" << env->curr_timestep
-                  << " DTR END time=" << ms << "ms"
-                  << " elapsed=" << elapsed() << "ms" << std::endl;
-        if (ms > 500)
-            std::cerr << "[SCHEDULE] WARNING: DTR took " << ms
-                      << "ms — likely O(A*T) blowup, A=" << agt_dtr.size()
-                      << " T=" << not_opened_tasks.size() << std::endl;
-
-        // std::unordered_set<int> remainder_tasks();
+    
         //Chaining
-         std::cout << "[SCHEDULE] t=" << env->curr_timestep << " DBC START"
-              << " opened_agt=" << opened_agt.size()
-              << " elapsed=" << elapsed() << "ms" << std::endl;
-    
-              {
-            auto t0 = std::chrono::steady_clock::now();
-            chaining_task(opened_agt, env, proposed_schedule, gamma, reserved_set, not_opened_tasks);
-            double ms = std::chrono::duration<double, std::milli>(
-                std::chrono::steady_clock::now() - t0).count();
-                std::cout << "[SCHEDULE] t=" << env->curr_timestep
-                        << " DBC END time=" << ms << "ms"
-                        << " elapsed=" << elapsed() << "ms" << std::endl;
-            }
-
-
-        // Balikin task schedule untuk agen yang sebelumnya diassigned task, tapi ga ketemu untuk DTR
-        // for (int i = 0; i < env->num_of_agents; i++) {
-        //     if (proposed_schedule[i] == -1) {
-        //         int curr_task = env->curr_task_schedule[i];
-        //         if (curr_task != -1) {
-        //             auto it = env->task_pool.find(curr_task);
-        //             if (it != env->task_pool.end() && it->second.t_completed < 0) {
-        //                 proposed_schedule[i] = curr_task;
-        //             }
-        //         }
-        //     }
-        // }
-
-        // int working = 0;
-        // for (int i = 0 ; i < env->curr_task_schedule.size() ; i++) {
-        //     if (env->curr_task_schedule[i] != -1) working++;
-        // }
-
-        // cout << "number of agents : " << env->num_of_agents << " === agt_dtr size: " << agt_dtr.size() << " === opened_agt size: " << opened_agt.size() << " === working agents: " << working << std::endl; 
-            double total_ms = elapsed();
-        std::cout << "[SCHEDULE] t=" << env->curr_timestep
-                << " plan END total=" << total_ms << "ms" << std::endl;
-            
-            if (total_ms > 2000) 
-            std::cerr << "[SCHEDULE] WARNING: t=" << env->curr_timestep
-                  << " plan exceeded 2000ms (" << total_ms << "ms)" << std::endl;
-    
-
-        //     std::cout << "[SCHEDULE] t=" << env->curr_timestep
-        //   << " proposed_schedule unassigned agents:" << std::endl;
-
-
-
-        // In schedule_plan, at the END:
-{
-    std::cout << "[SCHEDULE] t=" << env->curr_timestep << " proposed_schedule: ";
-    for (int i = 0; i < env->num_of_agents; i++) {
-        std::cout << proposed_schedule[i];
-        if (i < env->num_of_agents - 1) std::cout << ",";
-    }
-    std::cout << std::endl;
-}
-            }
-
-
-   
+        chaining_task(opened_agt, env, proposed_schedule, gamma, reserved_set, not_opened_tasks);
+     
+        }
 }
