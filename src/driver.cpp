@@ -57,7 +57,8 @@ int main(int argc, char **argv)
         ("numberOfCluster,k", po::value<int>()->default_value(10), "the number of cluster used in the voronoi map generation")
         ("radius,r", po::value<int>()->default_value(5), "the number of cluster used in the voronoi map generation")
         ("limitNumHW,lnhw", po::value<int>()->default_value(INTERVAL_MAX), "the limit for the number of highway edges")
-        ("cPenalty", po::value<int>()->default_value(2), "constant for going against the highway edges");
+        ("cPenalty", po::value<int>()->default_value(2), "constant for going against the highway edges")
+        ("mode", po::value<string>()->default_value("pibt"), "solver mode. wppl / pibt (lowercase)");
     clock_t start_time = clock();
     po::store(po::parse_command_line(argc, argv, desc), vm);
 
@@ -116,6 +117,7 @@ int main(int argc, char **argv)
     planner->env->r         = vm["radius"].as<int>();
     planner->env->c_penalty = vm["cPenalty"].as<int>();
     planner->env->max_hw = vm["limitNumHW"].as<int>();
+    planner->env->mode = vm["mode"].as<string>();
 
     auto input_json_file = vm["inputFile"].as<std::string>();
     json data;

@@ -32,12 +32,16 @@ include_directories("custom_algo")
 # Include semua biar ga perlu "../.."
 include_directories("custom_algo/preprocessing")
 include_directories("custom_algo/planner")
+include_directories("custom_algo/planner/solvers")
+include_directories("custom_algo/planner/WPPL")
 include_directories("custom_algo/scheduler")
 
 file(GLOB SOURCES "src/*.cpp" 
                     "custom_algo/*.cpp" 
                     "custom_algo/preprocessing/*.cpp"
                     "custom_algo/planner/*.cpp"
+                    "custom_algo/planner/solvers/*.cpp"
+                    "custom_algo/planner/WPPL/*.cpp"
                     "custom_algo/scheduler/*.cpp"
                     )
 

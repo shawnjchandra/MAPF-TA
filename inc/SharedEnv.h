@@ -54,6 +54,8 @@ public:
     std::unordered_map<int,int> makespan;
 
     //Planning
+    string mode;
+
     CustomAlgo::PlannerState planner_state;
     int horizon;
     int m; //Jumlah thread Worker
