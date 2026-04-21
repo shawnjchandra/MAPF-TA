@@ -6,7 +6,7 @@
 #include "mapf_utils.h"
 #include "highway.h"
 #include "SharedEnv.h"
-#include <omp.h>
+
 
 namespace CustomAlgo{
     
@@ -25,5 +25,5 @@ namespace CustomAlgo{
     void compute_inter_from(SharedEnvironment* env, int gate_idx);
     
     void generate_HPAHMap(SharedEnvironment* env, std::vector<int> centroids);  
-    void compute_cluster_from(SharedEnvironment* env, int c_src);
+
 }
