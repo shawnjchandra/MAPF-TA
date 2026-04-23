@@ -8,8 +8,8 @@ namespace CustomAlgo {
         assert(env->num_of_agents != 0);
 
         auto& ps = env->planner_state;
-        ps.w = max(3, ps.w);
-        ps.h = max(1, ps.h);
+        ps.w = 5;
+        ps.h = 1;
         env->horizon = ps.h;
         env->m = 3;
 
@@ -64,10 +64,13 @@ namespace CustomAlgo {
 
     void WPPLSolver::plan(int time_limit, std::vector<Action>& actions, SharedEnvironment* env ){
          auto& ps = env->planner_state;
-
+        auto plan_start = std::chrono::steady_clock::now();
+        int h = ps.h;
         // Reset tiap timestep state 
         prev_decision.assign(env->map.size(), -1);
         decision.assign(env->map.size(), -1);
+        std::fill(occupied.begin(), occupied.end(), false);
+
 
         for (int a = 0; a < env->num_of_agents; a++) {
 
@@ -93,12 +96,15 @@ namespace CustomAlgo {
             if (decided[a].state == DONE::NOT_DONE) {
                 decision[decided[a].loc] = a;
                 next_states[a] = State(decided[a].loc, -1, -1);
+
+                occupied[prev_states[a].location] = true;
             }
 
+            
             // Update goal
             goal_per_agent[a] = env->goal_locations[a].empty() ? prev_states[a].location : env->goal_locations[a].front().first;
 
-            // --- Update priorities (pakai dari original framework) ---
+            // Update priorities (pakai dari original framework) 
             bool is_at_goal = (prev_states[a].location == goal_per_agent[a]);
 
             if (env->goal_locations[a].empty()) {
@@ -124,7 +130,20 @@ namespace CustomAlgo {
             return p[a] > p[b];  
         });
 
-        std::fill(occupied.begin(), occupied.end(), false);
+
+       if (wppl.steps_since_plan == 0) {
+            run_windowed_pibt(wppl, env, ids, goal_per_agent, p, p_copy, decided);
+        } else {
+            // Validate plan still matches reality
+            auto& expected = wppl.wppl_plan[wppl.steps_since_plan];
+            for (int a = 0; a < env->num_of_agents; a++) {
+                if (expected[a].location != env->curr_states[a].location) {
+                    run_windowed_pibt(wppl, env, ids, goal_per_agent, p, p_copy, decided);
+                    wppl.steps_since_plan = 0;
+                    break;
+                }
+            }
+        }
 
         // Isi next state dengan ngambil dari step since (re)plan + 1 (yang harusnya kosong)
         std::vector<State>& planned = wppl.wppl_plan[wppl.steps_since_plan + 1];
@@ -134,14 +153,17 @@ namespace CustomAlgo {
             if (decided[i].state == DONE::NOT_DONE) continue;
 
             // Hanya proses agen yang belum punya rencana gerak
-            if (next_states[i].location == -1) continue;
+            if (next_states[i].location != -1) continue;
 
             auto& target = planned[i];
-            if (target.location >= 0 && decision[target.location] == -1) {
+            if (target.location >= 0 && decision[target.location] == -1 && !occupied[target.location]) {
+                
                 next_states[i] = target;
                 decision[target.location] = i;
             }
         }
+
+
 
         // Jalankan PIBT
         for (int i : ids) {
@@ -156,6 +178,9 @@ namespace CustomAlgo {
         }
 
         wppl.steps_since_plan++;
+        if (wppl.steps_since_plan >= h) wppl.steps_since_plan = 0;
+
+
         // Extract actions 
         actions.resize(env->num_of_agents);
         for (int id : ids) {
@@ -175,6 +200,19 @@ namespace CustomAlgo {
             actions[id] = getAction(prev_states[id], decided[id].loc, env);
             checked[id] = false;
         }
+
+        // Find and print conflicting agents after extract
+        // for (int i = 0; i < env->num_of_agents; i++) {
+        //     for (int j = i + 1; j < env->num_of_agents; j++) {
+        //         if (decided[i].loc == decided[j].loc) {
+        //             std::cout << "[POST-EXTRACT t=" << env->curr_timestep << "] "
+        //                     << "DECIDED CONFLICT agents " << i << " and " << j
+        //                     << " both targeting loc " << decided[i].loc
+        //                     << " | a" << i << " action=" << (int)actions[i]
+        //                     << " | a" << j << " action=" << (int)actions[j] << "\n";
+        //         }
+        //     }
+        // }
 
         // moveCheck smua agen, validasi tidak ada forward move yang blokir satu sama lain 
         for (int id = 0; id < env->num_of_agents; id++) {

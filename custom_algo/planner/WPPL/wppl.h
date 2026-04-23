@@ -12,10 +12,11 @@ namespace CustomAlgo {
     };
 
     void wppl_init (WPPLState& wppl, SharedEnvironment* env);
-    void run_windowed_pibt (WPPLState& wppl,
-        SharedEnvironment* env,
-        const std::vector<int>& ids,
-        const std::vector<int>& goal_per_agent,
-        const std::vector<double>& p
-    );
+    void run_windowed_pibt(WPPLState& wppl,
+                       SharedEnvironment* env,
+                       const std::vector<int>& ids,
+                       const std::vector<int>& goal_per_agent,
+                       std::vector<double>& p,
+                       const std::vector<double>& p_copy,
+                       const std::vector<DCR>& decided);
 }

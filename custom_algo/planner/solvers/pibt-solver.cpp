@@ -104,7 +104,7 @@ namespace CustomAlgo {
             // Update goal
             goal_per_agent[a] = env->goal_locations[a].empty() ? prev_states[a].location : env->goal_locations[a].front().first;
 
-            // --- Update priorities (pakai dari original framework) ---
+            // Update priorities (pakai dari original framework)
             bool is_at_goal = (prev_states[a].location == goal_per_agent[a]);
 
             if (env->goal_locations[a].empty()) {

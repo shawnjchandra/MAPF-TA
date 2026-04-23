@@ -129,6 +129,7 @@ namespace CustomAlgo {
                 continue;
 
             // Wait tidak perlu validateMove (sudah pasti valid)
+            // Kalau hanya rotate juga tidak perlu validate
             if (cand.location != prev_loc) {
                 assert(validateMove(prev_loc, cand.location, env));
             }
