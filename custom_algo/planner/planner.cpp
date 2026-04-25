@@ -10,7 +10,7 @@ namespace CustomAlgo {
     void planner_initialize(int preprocess_time_limit, SharedEnvironment* env) {
         const string& mode = env->mode;
 
-        if (mode == "lns") {
+        if (mode == "wppl") {
             solver = std::make_unique<WPPLSolver>();
         } else if (mode == "pibt") {    
             solver = std::make_unique<PIBTSolver>();

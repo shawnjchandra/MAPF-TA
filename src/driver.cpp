@@ -58,7 +58,7 @@ int main(int argc, char **argv)
         ("radius,r", po::value<int>()->default_value(5), "the number of cluster used in the voronoi map generation")
         ("limitNumHW,lnhw", po::value<int>()->default_value(INTERVAL_MAX), "the limit for the number of highway edges")
         ("cPenalty", po::value<int>()->default_value(2), "constant for going against the highway edges")
-        ("mode", po::value<string>()->default_value("lns"), "solver mode. lns / pibt (lowercase)");
+        ("mode", po::value<string>()->default_value("wppl"), "solver mode. wppl / pibt (lowercase)");
     clock_t start_time = clock();
     po::store(po::parse_command_line(argc, argv, desc), vm);
 
