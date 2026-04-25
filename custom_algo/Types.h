@@ -212,22 +212,22 @@ namespace CustomAlgo{
 		// std::vector<DCR> decided;
 	};
 
-	enum class DestroyHeuristic { AGENT_BASED, RANDOM, MAP_BASED, COUNT };
+	// enum class DestroyHeuristic { AGENT_BASED, RANDOM, MAP_BASED, COUNT };
 	
-	struct LNS{
+	// struct LNS{
 
-		std::mutex mtx;
-		std::vector<std::vector<int>> P_min;
-		int P_min_soc = INTERVAL_MAX;
+	// 	std::mutex mtx;
+	// 	std::vector<std::vector<int>> P_min;
+	// 	int P_min_soc = INTERVAL_MAX;
 
-		std::array<float, (int)DestroyHeuristic::COUNT> weights;
+	// 	std::array<float, (int)DestroyHeuristic::COUNT> weights;
 		
-		std::atomic<bool> stop_flag;
+	// 	std::atomic<bool> stop_flag;
 
-		LNS() { 
-			weights.fill(1.0f); 
-		};
-	};
+	// 	LNS() { 
+	// 		weights.fill(1.0f); 
+	// 	};
+	// };
 	typedef std::vector<std::vector<int>> Neighbors;
 
 }
