@@ -1,7 +1,7 @@
 #include "planner.h"
 #include "solver.h"
 #include "pibt-solver.h"
-#include "wppl-solver.h"
+#include "wppl.h"
 
 namespace CustomAlgo {
 
@@ -10,9 +10,13 @@ namespace CustomAlgo {
     void planner_initialize(int preprocess_time_limit, SharedEnvironment* env) {
         const string& mode = env->mode;
 
-        if (mode == "wppl") {
+        if (mode == "lns") {
             solver = std::make_unique<WPPLSolver>();
-        } else {    
+        } else if (mode == "pibt") {    
+            solver = std::make_unique<PIBTSolver>();
+
+        } else { //TRAJLNS
+            
             solver = std::make_unique<PIBTSolver>();
         }
 
