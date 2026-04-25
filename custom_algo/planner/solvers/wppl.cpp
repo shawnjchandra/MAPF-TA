@@ -445,6 +445,7 @@ namespace CustomAlgo {
                     int new_soc = compute_soc(lns_state, w, env);
                     int dif_soc = local_copy.best_soc - new_soc;
                     
+                    //
                     {
                         std::lock_guard<std::mutex> lk(mtx);
                         lns_state.update_weight(h, dif_soc);
