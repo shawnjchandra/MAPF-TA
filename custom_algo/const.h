@@ -19,4 +19,8 @@ namespace CustomAlgo {
     // const int SCHEDULER_TIMELIMIT_TOLERANCE = 0;
     const int SCHEDULER_TIMELIMIT_TOLERANCE = 10;
     
+
+     // Traffic flow assignment end time tolerance in ms.
+    // The default planner will end the traffic flow assignment phase this many milliseconds before traffic flow assignment end time.
+    const int TRAFFIC_FLOW_ASSIGNMENT_END_TIME_TOLERANCE = 10;
 }

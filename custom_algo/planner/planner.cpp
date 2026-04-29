@@ -3,6 +3,8 @@
 #include "pibt-solver.h"
 #include "wppl.h"
 
+#include "dplanner.h"
+
 namespace CustomAlgo {
 
     static std::unique_ptr<Solver> solver;
@@ -15,11 +17,16 @@ namespace CustomAlgo {
         } else if (mode == "pibt") {    
             solver = std::make_unique<PIBTSolver>();
 
-        } else { //TRAJLNS
+        } else if (mode == "traj") {//TRAJLNS kalau jadi
+            solver = std::make_unique<PIBTTrajSolver>();
+            cout << "Solver ported traj " << std::endl;
+        } else  { 
             
+            //Sementara fallback ke pibt
             solver = std::make_unique<PIBTSolver>();
         }
 
+        cout << "Mode : " << mode << std::endl;
         solver->initialize(preprocess_time_limit, env);
     }
 

@@ -28,6 +28,7 @@ include_directories("inc")
 
 # default planner -> custom_algo
 include_directories("custom_algo")
+include_directories("ported_default_planner")
 
 # Include semua biar ga perlu "../.."
 include_directories("custom_algo/preprocessing")
@@ -43,6 +44,7 @@ file(GLOB SOURCES "src/*.cpp"
                     "custom_algo/planner/solvers/*.cpp"
                     "custom_algo/planner/WPPL/*.cpp"
                     "custom_algo/scheduler/*.cpp"
+                    "ported_default_planner/*.cpp"
                     )
 
 

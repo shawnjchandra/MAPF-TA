@@ -102,7 +102,7 @@ class pyMAPFPlanner:
         loc2_y = loc2 % self.env.cols
         return abs(loc1_x-loc2_x)+abs(loc1_y-loc2_y)
 
-    def validateMove(self, loc: int, loc2: int) -> bool:
+    def d_validateMove(self, loc: int, loc2: int) -> bool:
         loc_x = loc//self.env.cols
         loc_y = loc % self.env.cols
         if(loc_x >= self.env.rows or loc_y >= self.env.cols or self.env.map[loc] == 1):
@@ -120,7 +120,7 @@ class pyMAPFPlanner:
                       location-1, location-self.env.cols]
         forward = candidates[direction]
         new_direction = direction
-        if (forward >= 0 and forward < len(self.env.map) and self.validateMove(forward, location)):
+        if (forward >= 0 and forward < len(self.env.map) and self.d_validateMove(forward, location)):
             neighbors.append((forward, new_direction))
         # turn left
         new_direction = direction-1
