@@ -15,7 +15,8 @@ namespace CustomAlgo {
         } else if (mode == "pibt") {    
             solver = std::make_unique<PIBTSolver>();
 
-        } else { //TRAJLNS
+        } else {
+            cout << "====== Mode yang dipakai tidak ada. Kembali ke PIBT ======" << std::endl;
             
             solver = std::make_unique<PIBTSolver>();
         }

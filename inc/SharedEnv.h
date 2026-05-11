@@ -37,6 +37,7 @@ public:
     int r; //radius
     int max_hw; //Limiting the amount of highways generated
 
+    int w;
     //Scheduling
     std::vector<int> agent_starts;
 

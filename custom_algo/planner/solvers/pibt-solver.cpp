@@ -11,10 +11,10 @@ namespace CustomAlgo {
         assert(env->num_of_agents != 0);
 
         auto& ps = env->planner_state;
-        ps.w = max(3, ps.w);
-        ps.h = max(1, ps.h);
-        env->horizon = ps.h;
-        env->m = 3;
+        ps.w = max(3, env->w);
+        // ps.h = max(1, ps.h);
+        // env->horizon = ps.h;
+        env->m = 8;
 
         // Inisialisasi dan masukuin nilai penalty highway ke gcm (sebagai base val nya)
         ps.gcm.assign(map_size, {1.0f, 1.0f, 1.0f, 1.0f});

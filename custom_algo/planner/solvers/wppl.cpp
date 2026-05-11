@@ -15,9 +15,10 @@ namespace CustomAlgo {
         assert(agent_size != 0);
  
         auto& ps = env->planner_state;
-        ps.w = std::max(3, ps.w);
-        ps.h = std::max(1, ps.h);
-        env->horizon = ps.h;
+
+        ps.w = std::max(3, env->w);
+        // ps.h = std::max(1, ps.h);
+        // env->horizon = ps.h;
  
         // GCM init (base penalty dari highway)
         ps.gcm.assign(map_size, {1.0f, 1.0f, 1.0f, 1.0f});
@@ -445,7 +446,7 @@ namespace CustomAlgo {
                     int new_soc = compute_soc(lns_state, w, env);
                     int dif_soc = local_copy.best_soc - new_soc;
                     
-                    //
+                    // 
                     {
                         std::lock_guard<std::mutex> lk(mtx);
                         lns_state.update_weight(h, dif_soc);

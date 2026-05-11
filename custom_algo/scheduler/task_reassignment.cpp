@@ -7,21 +7,26 @@ namespace CustomAlgo{
 
     void schedule_tasks(std::vector<int>& agt_dtr, SharedEnvironment* env, std::vector<int>& proposed_schedule, double gamma, std::unordered_set<int>& reserved_set, std::unordered_set<int>& free_tasks) {
 
+        /**
+         * @brief Catat task sudah diberikan ke agen siapa
+         * 
+         */
         std::unordered_map<int,int> task_to_agt;
         for (int i = 0 ; i < proposed_schedule.size() ; i++) {
             if (proposed_schedule[i] != -1)  {
                 task_to_agt[proposed_schedule[i]] = i;
-            }
-            
+            }            
         }
 
-
+        //Untuk hapus task ()
         std::unordered_set<int> removed_task;
         removed_task.reserve(agt_dtr.size());
     
 
         // int MAX_TRIES = 0.25 * env->task_pool.size();
         // int MAX_TRIES = 300;
+
+        // Loop semua agen minimal sekali. Dynamic changing dan inplace
         for (int dtr_i = 0 ; dtr_i < agt_dtr.size() ; dtr_i++) {
             int agt_id = agt_dtr[dtr_i];
             
@@ -134,6 +139,7 @@ namespace CustomAlgo{
             
         }
          
+        // Hapus dulu dari free tasks agar ga dipakai di DBC..
         for (int t_id : removed_task) {
             free_tasks.erase(t_id);
         }

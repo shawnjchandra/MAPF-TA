@@ -23,18 +23,30 @@ namespace CustomAlgo {
      * 
      */
 
+     /**
+      * @brief Untuk timestep diatas 0. Catat task yang udah diselesein di timestep sebelumnya.
+      * 
+      * @param env 
+      * @param proposed_schedule 
+      * @param reserved_set 
+      */
     void get_newly_completed_tasks(SharedEnvironment* env, std::vector<int>& proposed_schedule, std::unordered_set<int>& reserved_set) {
 
-            if (env->curr_timestep == 0) return;
+        if (env->curr_timestep == 0) return;
         
-            for (int agt_id : env->new_freeagents) {
-                int finished_task = proposed_schedule[agt_id];
-                if (finished_task != -1) {
-                    env->newly_completed_tasks.push_back(finished_task);
+        for (int agt_id : env->new_freeagents) {
 
-                    if (reserved_set.count(finished_task)) {
-                        reserved_set.erase(finished_task);
-                    }
+            /**
+             * @brief Kalau ga salah, proposed schedule ga langsung atau ga dibersihin sama TaskScheduler/CompetitionSystem. Jadi harus manual dan bisa dipakai tracking task yang baru diselesaikan
+             * 
+             */
+            int finished_task = proposed_schedule[agt_id];
+            if (finished_task != -1) {
+                env->newly_completed_tasks.push_back(finished_task);
+
+                if (reserved_set.count(finished_task)) {
+                    reserved_set.erase(finished_task);
+                }
             }
         }
     }
@@ -76,6 +88,10 @@ namespace CustomAlgo {
 
         get_newly_completed_tasks(env, proposed_schedule, reserved_set);
 
+        /**
+         * @brief Data seluruh task yang baru diselesaikan di timestep sebelumnya , untuk nilai gamma congestion
+         * 
+         */
         for (int t_id : env->newly_completed_tasks) {
             Task& t = env->task_pool[t_id];
             env->total_actual_duration+= t.t_completed - t.t_revealed;
