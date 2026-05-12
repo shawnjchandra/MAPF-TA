@@ -1,0 +1,8 @@
+{
+    "mapFile": "maps/terbuka.map",
+    "agentFile": "agents/terbuka_bench_5.agents",
+    "teamSize": 5,
+    "taskFile": "tasks/terbuka_bench.tasks",
+    "numTasksReveal": 1.5,
+    "version": "2024 LoRR"
+}

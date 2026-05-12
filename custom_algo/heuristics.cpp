@@ -63,9 +63,6 @@ namespace CustomAlgo{
         //IntraHT (Jika destination dan source dalam cluster yang sama)
         if (c_src == c_dest) {
 
-            // Validasi source dan destionation secara lokal
-            int cluster_size = env->hpa_h.local_to_global[c_src].size();
-
             // Lazy compute jika belum ada , tapi seharusnya udah ada karena c_dest = c_src ,dan c_dest sudah dicari sebelumnya
             if (env->hpa_h.IntraHT[c_src].find(dest_local) == 
                 env->hpa_h.IntraHT[c_src].end()) {
@@ -93,6 +90,7 @@ namespace CustomAlgo{
 
             int g_s_local = env->hpa_h.global_to_local[g_s];
             int g_s_idx   = env->hpa_h.AG.gate_index[g_s];
+            
             if (g_s_idx >= INTERVAL_MAX) continue;
 
                 //Validasi awal (cek udah dihitung atau belum)
@@ -118,6 +116,7 @@ namespace CustomAlgo{
             if (env->hpa_h.inter_cache.find(g_s_idx) == 
             env->hpa_h.inter_cache.end()) {
                 CustomAlgo::compute_inter_from(env, g_s_idx);
+                // continue; // Skip.. dulu, untuk cek kalau pakai full compute dari awal..
             }
 
             // Untuk setiap gate pada cluster tujuan

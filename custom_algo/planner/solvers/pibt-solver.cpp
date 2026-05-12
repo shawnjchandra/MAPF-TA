@@ -1,12 +1,14 @@
 #include "pibt-solver.h"
 #include "mapf_utils.h"
 #include "heuristics.h"
+#include "highway.h"
 
 namespace CustomAlgo {
 
     void PIBTSolver::initialize(int preprocess_time_limit, SharedEnvironment* env) {
         int map_size   = env->map.size();
         int agent_size = env->num_of_agents;
+        fswap = env->fswap;
 
         assert(env->num_of_agents != 0);
 
@@ -184,6 +186,9 @@ namespace CustomAlgo {
                        env->curr_timestep);
             // current_plans tidak dipakai (pure PIBT), tidak perlu di-erase
         }
+
+        // Swap highways
+        if (env->curr_timestep > 0 && env->curr_timestep % fswap == 0) reverseHighways(env);
 
         // Reset wait_map setiap gcm_freq timestep
         if (env->curr_timestep > 0 &&

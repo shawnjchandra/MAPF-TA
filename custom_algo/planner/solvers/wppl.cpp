@@ -4,14 +4,16 @@
 #include "heuristics.h"
 #include "guidance_cost_map.h"
 #include "const.h"
+#include "highway.h"
 
 namespace CustomAlgo {
     
     // Copy yang pibt 
     void WPPLSolver::initialize(int preprocess_time_limit, SharedEnvironment* env) {
-         int map_size   = env->map.size();
+        int map_size   = env->map.size();
         int agent_size = env->num_of_agents;
- 
+        fswap = env->fswap;
+
         assert(agent_size != 0);
  
         auto& ps = env->planner_state;
@@ -27,6 +29,8 @@ namespace CustomAlgo {
             int orient = key.second;
             ps.gcm[loc][orient] = (float)env->c_penalty;
         }
+
+        // env->m = max(env->m,8);
  
         ps.wait_map.assign(map_size, {0, 0, 0, 0});
         ps.w_peak.resize(map_size);
@@ -700,6 +704,9 @@ namespace CustomAlgo {
         for (int a : ids) {
             gcm_update( env, env->curr_states[a].location, env->curr_states[a].orientation, env->curr_timestep);
         }
+
+        // Swap highways
+        if (env->curr_timestep > 0 && env->curr_timestep % fswap == 0)reverseHighways(env);
 
         if (env->curr_timestep > 0 && env->curr_timestep % ps.gcm_freq == 0) {
             for (auto& loc : ps.wait_map) loc.fill(0);

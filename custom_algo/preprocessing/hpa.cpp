@@ -78,7 +78,7 @@ namespace CustomAlgo{
 
             for (int neigh : Neighbors) {
                 int c_b = env->hpa_h.voronoi_map[neigh];
-                if (c_a == c_b || c_b == -1) continue;
+                if (c_a == c_b || c_b == -1 || c_a == -1) continue;
 
                 // Pastikan lokasi gate a dan b yang sama tidak dicatat berulang
                 std::pair<int,int> pair_key = {min(loc,neigh), max(loc,neigh)};

@@ -124,8 +124,6 @@ namespace CustomAlgo{
 
     //Putar balikan jalur penalty
     void reverseHighways(SharedEnvironment* env) {
-        auto temp = env->hpa_h.hw.e_hw;
-        env->hpa_h.hw.e_hw = env->hpa_h.hw.r_e_hw;
-        env->hpa_h.hw.r_e_hw = temp;
+        std::swap(env->hpa_h.hw.e_hw, env->hpa_h.hw.r_e_hw);
     }
 }
