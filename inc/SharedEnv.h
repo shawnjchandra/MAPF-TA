@@ -25,6 +25,7 @@ public:
     // Modifikasi
     // ------------------------------
     std::mt19937 rng;
+    std::mutex hpa_cache_mtx;
 
 
     //Preprocessing
@@ -39,6 +40,7 @@ public:
     int max_hw; //Limiting the amount of highways generated
 
     int w;
+    int h;
     //Scheduling
     std::vector<int> agent_starts;
 

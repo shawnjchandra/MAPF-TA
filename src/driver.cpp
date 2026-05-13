@@ -7,6 +7,7 @@
 #include <signal.h>
 #include <climits>
 #include <memory>
+#include "map_dumper.h"
 
 
 #ifdef PYTHON
@@ -23,12 +24,15 @@ using json = nlohmann::json;
 
 po::variables_map vm;
 std::unique_ptr<BaseSystem> system_ptr;
-
+Entry* g_planner = nullptr; 
 
 void sigint_handler(int a)
 {
     fprintf(stdout, "stop the simulation...\n");
     system_ptr->saveResults(vm["output"].as<std::string>(),vm["outputScreen"].as<int>());
+    if (vm.count("dumpMaps") && vm["dumpMaps"].as<bool>() && g_planner != nullptr) {
+        CustomAlgo::dump_maps(g_planner->env, vm["output"].as<std::string>());
+    }
     _exit(0);
 }
 
@@ -60,9 +64,11 @@ int main(int argc, char **argv)
         ("fswap", po::value<int>()->default_value(10), "timestep frequency to reverse the highway direction")
         ("c", po::value<int>()->default_value(2), "constant for going against the highway edges")
         ("isSoftHW", po::value<bool>()->default_value(true), "Default Highways Configuration")
-        ("w", po::value<int>()->default_value(3), "Windowed Size for Planning")
+        ("w", po::value<int>()->default_value(10), "Windowed Size for Planning")
+        ("h", po::value<int>()->default_value(1), "Replanning Period")
         ("m", po::value<int>()->default_value(8), "Number of Thread Worker for DROP-LNS")
-        ("mode", po::value<string>()->default_value("wppl"), "solver mode. wppl / pibt (lowercase)");
+        ("mode", po::value<string>()->default_value("wppl"), "solver mode. wppl / pibt (lowercase)")
+        ("dumpMaps", po::value<bool>()->default_value(true), "dump heatmap/voronoi/highway/HPA ke <output>.maps.json saat simulasi selesai");
     clock_t start_time = clock();
     po::store(po::parse_command_line(argc, argv, desc), vm);
 
@@ -116,12 +122,14 @@ int main(int argc, char **argv)
     if (planner == nullptr) {
         planner = new Entry();
     }
+    g_planner = planner;
     // Modifikasi
     planner->env->k         = vm["numberOfCluster"].as<int>();
     planner->env->r         = vm["radius"].as<int>();
     planner->env->max_hw = vm["limitNumHW"].as<int>();
     planner->env->mode = vm["mode"].as<string>();
     planner->env->w = vm["w"].as<int>();
+    planner->env->h = vm["h"].as<int>();
     planner->env->m = vm["m"].as<int>();
     planner->env->fswap = vm["fswap"].as<int>();
     
@@ -189,7 +197,9 @@ int main(int argc, char **argv)
 
 
     system_ptr->saveResults(vm["output"].as<std::string>(),vm["outputScreen"].as<int>());
-
+    if (vm["dumpMaps"].as<bool>()) {
+        CustomAlgo::dump_maps(planner->env, vm["output"].as<std::string>());
+    }
     delete model;
     delete logger;
     _exit(0);
