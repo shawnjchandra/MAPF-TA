@@ -12,7 +12,6 @@ namespace CustomAlgo {
     void WPPLSolver::initialize(int preprocess_time_limit, SharedEnvironment* env) {
         int map_size   = env->map.size();
         int agent_size = env->num_of_agents;
-        fswap = env->fswap;
 
         assert(agent_size != 0);
  
@@ -73,8 +72,8 @@ namespace CustomAlgo {
         }
         p_copy = p;
 
-        LNSState lns_state = LNSState();
-        lns_state.has_cached_plan = false;
+        this->lns_state = LNSState();
+        this->lns_state.has_cached_plan = false;
     }
 
     //Utilnya
@@ -315,30 +314,38 @@ namespace CustomAlgo {
         int w = ps.w;
         int n = env->num_of_agents;
         int map_size = env->map.size();
-
+ 
         auto& lns_plan = lns_state.lns_plan;
-
+ 
         std::unordered_set<int> destroyed(destroyed_agents.begin(), destroyed_agents.end());
-
-        // Tracking swap conflict
-        std::vector<int> fxd_dst;
-        fxd_dst.assign(map_size, -1);
-
+ 
+        // thread_local: per-thread buffer. Allocated once, reused.
+        // assign() resize + reset sekaligus
+        thread_local std::vector<int>  t_prev_dec;
+        thread_local std::vector<int>  t_dec;
+        thread_local std::vector<bool> t_occupied;
+        thread_local std::vector<int>  t_fxd_dst;
+ 
+        t_prev_dec.assign(map_size, -1);
+        t_dec.assign(map_size, -1);
+        t_occupied.assign(map_size, false);
+        t_fxd_dst.assign(map_size, -1);
+ 
         // Prep untuk windowed PIBT lagi
         for (int t = 0 ; t < w; t++) {
             std::vector<State>& prev_state = lns_plan.plan[t];
             std::vector<State>& next_state = lns_plan.plan[t+1];
-
-            std::fill(sim_prev_dec.begin(), sim_prev_dec.end(), -1);
-            std::fill(sim_dec.begin(), sim_dec.end(), -1);
-            std::fill(sim_occupied.begin(), sim_occupied.end(), false);
-            std::fill(fxd_dst.begin(), fxd_dst.end(), -1);
-
-
+ 
+            std::fill(t_prev_dec.begin(), t_prev_dec.end(), -1);
+            std::fill(t_dec.begin(), t_dec.end(), -1);
+            std::fill(t_occupied.begin(), t_occupied.end(), false);
+            std::fill(t_fxd_dst.begin(), t_fxd_dst.end(), -1);
+ 
+ 
             for (int a = 0 ; a < n ; a++) {
-                if (prev_state[a].location >= 0) sim_prev_dec[prev_state[a].location] = a;
+                if (prev_state[a].location >= 0) t_prev_dec[prev_state[a].location] = a;
             }
-
+ 
             /*  Reset state untuk yang destroyed_agents, karena hanya perlu replan mereka.
             *   Agen lainnya dibiarkan.
             */
@@ -347,36 +354,36 @@ namespace CustomAlgo {
                     next_state[a] = State();
                     continue;
                 }
-
+ 
                 // Agen yang tidak di destroy, di save lagi lokasi dan claim posisi t+1 nya
                 int next_loc = next_state[a].location;
-                if (next_loc >= 0) sim_dec[next_loc] = a;
-
+                if (next_loc >= 0) t_dec[next_loc] = a;
+ 
                 int curr_loc = prev_state[a].location;
-                if (curr_loc >= 0 && next_loc >= 0 && curr_loc != next_loc) fxd_dst[curr_loc] = next_loc;
+                if (curr_loc >= 0 && next_loc >= 0 && curr_loc != next_loc) t_fxd_dst[curr_loc] = next_loc;
             }
-
+ 
             //Jalanin PIBT untuk destroy agent sesuai priority
             for (int id : ids) {
                 if (!destroyed.count(id)) continue;
                 if (next_state[id].location != -1) continue;
-
-                pibt(id, -1 , prev_state, next_state, sim_prev_dec, sim_dec, sim_occupied, goal_per_agent, env, p);
+ 
+                pibt(id, -1 , prev_state, next_state, t_prev_dec, t_dec, t_occupied, goal_per_agent, env, p);
             }
-
+ 
             for (int a : destroyed_agents) {
                 int from = prev_state[a].location;
                 int to = next_state[a].location;
-
+ 
                 //Cek kalau ada swap conflict (tukeran posisi antara agen di from dan to)
-                if (from >= 0 && to >= 0 && from != to && fxd_dst[to] == from) {
-                    sim_dec[from] = a;
-                    sim_dec[to] = -1;
+                if (from >= 0 && to >= 0 && from != to && t_fxd_dst[to] == from) {
+                    t_dec[from] = a;
+                    t_dec[to] = -1;
                     next_state[a] = prev_state[a];
                 }
             }
         }
-
+ 
     }
 
     /**
@@ -425,14 +432,14 @@ namespace CustomAlgo {
         int N = n / 10;
         
         std::mutex mtx;
-
+ 
         std::vector<std::thread> threads;
         for (int i = 0 ; i < env->m ; i++) {
-            threads.emplace_back([&](){
+            threads.emplace_back([&, i](){
                 
                 // arbitrary number (angka random), mastiin setiap thread beda
                 std::mt19937 rng(i * 99);
-
+ 
                 while (std::chrono::steady_clock::now() < deadline ){ 
                     LNSState local_copy;
                     
@@ -441,20 +448,19 @@ namespace CustomAlgo {
                         std::lock_guard<std::mutex> lk(mtx);
                         local_copy = lns_state;
                     }
-
+ 
                     DESTROYHEURISTIC h = local_copy.select_heuristic(rng);
                     auto destroyed_agents = destroy_agents(h, local_copy, N, rng, env);
                     repair(local_copy, destroyed_agents, env);
-
-                    
-                    int new_soc = compute_soc(lns_state, w, env);
+ 
+                    int new_soc = compute_soc(local_copy, w, env);
                     int dif_soc = local_copy.best_soc - new_soc;
                     
                     // 
                     {
                         std::lock_guard<std::mutex> lk(mtx);
                         lns_state.update_weight(h, dif_soc);
-
+ 
                         if (new_soc  < lns_state.best_soc) {
                             lns_state.best_soc = new_soc;
                             lns_state.lns_plan = local_copy.lns_plan;
@@ -463,7 +469,7 @@ namespace CustomAlgo {
                 }
             });
         }
-
+ 
         for (auto& t : threads) t.join();
         
     }
@@ -612,7 +618,7 @@ namespace CustomAlgo {
         });
 
         // Fase 1 : w timestep plan (simulasi pertama)
-        LNSPlan& lns_plan = lns_state.lns_plan;
+        LNSPlan& lns_plan = this->lns_state.lns_plan;
 
         if (lns_state.has_cached_plan) {
             lns_plan = lns_state.cached_plan;
@@ -706,7 +712,7 @@ namespace CustomAlgo {
         }
 
         // Swap highways
-        if (env->curr_timestep > 0 && env->curr_timestep % fswap == 0)reverseHighways(env);
+        // if (env->curr_timestep > 0 && env->curr_timestep % env->fswap == 0)reverseHighways(env);
 
         if (env->curr_timestep > 0 && env->curr_timestep % ps.gcm_freq == 0) {
             for (auto& loc : ps.wait_map) loc.fill(0);

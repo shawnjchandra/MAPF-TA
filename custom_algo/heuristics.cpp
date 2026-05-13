@@ -1,6 +1,6 @@
 #include "heuristics.h"
 #include <queue>
-#include "preprocessing/hpa.h"
+#include "hpa.h"
 
 namespace CustomAlgo{
     //Diambil dari framework standard
@@ -57,7 +57,10 @@ namespace CustomAlgo{
         if (env->hpa_h.IntraHT[c_dest].find(dest_local) == env->hpa_h.IntraHT[c_dest].end()) {
                 
             auto ht = build_IntraHT(env, c_dest, dest);
-            env->hpa_h.IntraHT[c_dest][dest_local] = std::vector<std::array<int,4>>(ht.begin(), ht.end());
+            {
+                std::lock_guard<std::mutex> lk(env->hpa_cache_mtx);
+                env->hpa_h.IntraHT[c_dest][dest_local] = std::vector<std::array<int,4>>(ht.begin(), ht.end());
+            }
         }
 
         //IntraHT (Jika destination dan source dalam cluster yang sama)
@@ -70,8 +73,13 @@ namespace CustomAlgo{
                 if (env->hpa_h.IntraHT[c_src].find(dest_local) == 
                     env->hpa_h.IntraHT[c_src].end()) {
                     auto ht = build_IntraHT(env, c_src, dest);
-                    env->hpa_h.IntraHT[c_src][dest_local] = 
+
+                    {
+                        std::lock_guard<std::mutex> lk(env->hpa_cache_mtx);
+                        
+                        env->hpa_h.IntraHT[c_src][dest_local] = 
                         std::vector<std::array<int,4>>(ht.begin(), ht.end());
+                    }
                 }
             }
 
@@ -99,8 +107,13 @@ namespace CustomAlgo{
 
                 // lazy compute IntraHT for this gate as destination
                 auto ht = CustomAlgo::build_IntraHT(env, c_src, g_s);
-                env->hpa_h.IntraHT[c_src][g_s_local] =
+
+                {
+                    std::lock_guard<std::mutex> lk(env->hpa_cache_mtx);
+
+                    env->hpa_h.IntraHT[c_src][g_s_local] =
                     std::vector<std::array<int,4>>(ht.begin(), ht.end());
+                }
             }
                 
             int cluster_size_src = env->hpa_h.local_to_global[c_src].size();
@@ -115,7 +128,11 @@ namespace CustomAlgo{
             //Cek InterHT, dari gate cluster source udah pernah dihitung atau belum. Kalau belum, compute dan cache
             if (env->hpa_h.inter_cache.find(g_s_idx) == 
             env->hpa_h.inter_cache.end()) {
-                CustomAlgo::compute_inter_from(env, g_s_idx);
+                {
+                    std::lock_guard<std::mutex> lk(env->hpa_cache_mtx);
+
+                    CustomAlgo::compute_inter_from(env, g_s_idx);
+                }
                 // continue; // Skip.. dulu, untuk cek kalau pakai full compute dari awal..
             }
 
@@ -131,8 +148,12 @@ namespace CustomAlgo{
                 env->hpa_h.IntraHT[c_dest].end()) {
 
                     auto ht = CustomAlgo::build_IntraHT(env, c_dest, g_d);
-                    env->hpa_h.IntraHT[c_dest][g_d_local] =
+                    {
+                        std::lock_guard<std::mutex> lk(env->hpa_cache_mtx);
+                    
+                        env->hpa_h.IntraHT[c_dest][g_d_local] =
                         std::vector<std::array<int,4>>(ht.begin(), ht.end());
+                    }
                 }
 
                 

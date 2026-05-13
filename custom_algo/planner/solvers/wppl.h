@@ -77,7 +77,6 @@ namespace CustomAlgo {
 
         //Copy dari PIBT
         private:
-            int fswap;
 
             vector<double> p;
             vector<double> p_copy;

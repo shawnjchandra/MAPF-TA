@@ -239,7 +239,7 @@ namespace CustomAlgo{
             }
         } 
 
-        env->hpa_h.inter_cache.clear();
+        // env->hpa_h.inter_cache.clear();
     }
 
     /**

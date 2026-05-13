@@ -8,7 +8,6 @@ namespace CustomAlgo {
     void PIBTSolver::initialize(int preprocess_time_limit, SharedEnvironment* env) {
         int map_size   = env->map.size();
         int agent_size = env->num_of_agents;
-        fswap = env->fswap;
 
         assert(env->num_of_agents != 0);
 
@@ -188,7 +187,7 @@ namespace CustomAlgo {
         }
 
         // Swap highways
-        if (env->curr_timestep > 0 && env->curr_timestep % fswap == 0) reverseHighways(env);
+        // if (env->curr_timestep > 0 && env->curr_timestep % env->fswap == 0) reverseHighways(env);
 
         // Reset wait_map setiap gcm_freq timestep
         if (env->curr_timestep > 0 &&
