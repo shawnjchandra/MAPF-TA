@@ -5,8 +5,12 @@
 #include "heuristics.h"
 
 namespace CustomAlgo {
-    void chaining_task(std::vector<int>& opened_agt ,SharedEnvironment* env , std::vector<int>& proposed_schedule, double gamma, std::unordered_set<int>& reserved_set, std::unordered_set<int>& free_tasks) {
-       
+    void chaining_task(int time_limit, std::vector<int>& opened_agt ,SharedEnvironment* env , std::vector<int>& proposed_schedule, double gamma, std::unordered_set<int>& reserved_set, std::unordered_set<int>& free_tasks) {
+        auto start = std::chrono::steady_clock::now();
+        auto elapsed = [&](TimePoint from) {
+        return std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::steady_clock::now() - from).count();
+        };
 
         std::unordered_map<int,int> loc_to_task;        
         
@@ -29,6 +33,8 @@ namespace CustomAlgo {
         }
             
         for (int agt_id : opened_agt) {
+            if ( elapsed(start) > time_limit) break;
+
             State a_state = env->curr_states[agt_id];
 
             int curr_task_id = env->curr_task_schedule[agt_id];
@@ -103,9 +109,10 @@ namespace CustomAlgo {
             } 
         }
 
-        // Hapus dari free tasks untuk tidak dipakai lagi di DTR & DBC selanjutnya... 
         for (int t_id : removed_task) {
             free_tasks.erase(t_id);
         }
+        fprintf(stderr, "Elapsed Time Chaining :     %ldms\n", elapsed(start));
+
     }
 }

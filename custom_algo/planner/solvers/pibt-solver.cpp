@@ -1,7 +1,6 @@
 #include "pibt-solver.h"
 #include "mapf_utils.h"
 #include "heuristics.h"
-#include "highway.h"
 
 namespace CustomAlgo {
 
@@ -12,10 +11,10 @@ namespace CustomAlgo {
         assert(env->num_of_agents != 0);
 
         auto& ps = env->planner_state;
-        ps.w = max(3, env->w);
+        env->w = max(3, env->w);
         // ps.h = max(1, ps.h);
         // env->horizon = ps.h;
-        env->m = 8;
+        // env->m = 3;
 
         // Inisialisasi dan masukuin nilai penalty highway ke gcm (sebagai base val nya)
         ps.gcm.assign(map_size, {1.0f, 1.0f, 1.0f, 1.0f});
@@ -185,9 +184,6 @@ namespace CustomAlgo {
                        env->curr_timestep);
             // current_plans tidak dipakai (pure PIBT), tidak perlu di-erase
         }
-
-        // Swap highways
-        // if (env->curr_timestep > 0 && env->curr_timestep % env->fswap == 0) reverseHighways(env);
 
         // Reset wait_map setiap gcm_freq timestep
         if (env->curr_timestep > 0 &&

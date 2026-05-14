@@ -25,7 +25,6 @@ public:
     // Modifikasi
     // ------------------------------
     std::mt19937 rng;
-    std::mutex hpa_cache_mtx;
 
 
     //Preprocessing
@@ -35,12 +34,12 @@ public:
     std::vector<int> offsets; 
     int k;  //Number of cluster
     int c_penalty;  //Penalty constant for going against highway
-    int fswap; // Constant for swapping highway direction
     int r; //radius
     int max_hw; //Limiting the amount of highways generated
 
     int w;
     int h;
+
     //Scheduling
     std::vector<int> agent_starts;
 
@@ -66,6 +65,7 @@ public:
     int N_prctg; // Neighborhood size percentage (LNS)
     float gamma; // Variabel untuk update weights dari DestroyHeuristics
     float alpha; // Variabel untuk update gcm
+
     // ------------------------------
 
 

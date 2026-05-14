@@ -228,18 +228,18 @@ namespace CustomAlgo{
     void build_InterHT(SharedEnvironment* env) {
     
         // Build gate_index hanya pada pertama kali pemanggilan
-        if (env->hpa_h.AG.gate_index.empty() ||
-        env->hpa_h.AG.gate_index[env->hpa_h.AG.gates[0]] == INTERVAL_MAX) {
+        // if (env->hpa_h.AG.gate_index.empty() ||
+        // env->hpa_h.AG.gate_index[env->hpa_h.AG.gates[0]] == INTERVAL_MAX) {
             
-            env->hpa_h.AG.gate_index.assign(env->map.size(), INTERVAL_MAX);
-    
-            int gates_size = env->hpa_h.AG.gates.size();
-            for (int i = 0; i < gates_size; i++) {
-                env->hpa_h.AG.gate_index[env->hpa_h.AG.gates[i]] = i;
-            }
-        } 
+        env->hpa_h.AG.gate_index.assign(env->map.size(), INTERVAL_MAX);
 
-        // env->hpa_h.inter_cache.clear();
+        int gates_size = env->hpa_h.AG.gates.size();
+        for (int i = 0; i < gates_size; i++) {
+            env->hpa_h.AG.gate_index[env->hpa_h.AG.gates[i]] = i;
+        }
+        // } 
+
+        env->hpa_h.inter_cache.clear();
     }
 
     /**
@@ -323,22 +323,27 @@ namespace CustomAlgo{
     }
 
     void warmup_inter_cache(SharedEnvironment* env) {
-        std::set<int> agent_clusters;
-        for (int loc : env->agent_starts) {
-            int c = env->hpa_h.voronoi_map[loc];
-            agent_clusters.insert(c);
-        }
+        // std::set<int> agent_clusters;
+        // for (int loc : env->agent_starts) {
+        //     int c = env->hpa_h.voronoi_map[loc];
+        //     agent_clusters.insert(c);
+        // }
 
-        int gates_size = env->hpa_h.Gates.size();
+        // int gates_size = env->hpa_h.Gates.size();
 
-        // Untuk setiap cluster yang ditempat, buat interHT nya
-        for (int c : agent_clusters){
-            for (int g : env->hpa_h.Gates[c]){
-                int g_idx = env->hpa_h.AG.gate_index[g];
-                if(g_idx == INTERVAL_MAX || env->hpa_h.inter_cache.count(g_idx)) continue;
+        // // Untuk setiap cluster yang ditempat, buat interHT nya
+        // for (int c : agent_clusters){
+        //     for (int g : env->hpa_h.Gates[c]){
+        //         int g_idx = env->hpa_h.AG.gate_index[g];
+        //         if(g_idx == INTERVAL_MAX || env->hpa_h.inter_cache.count(g_idx)) continue;
 
+        //         compute_inter_from(env, g_idx);
+        //     }
+        // }
+        int gates_size = env->hpa_h.AG.gates.size();
+        for (int g_idx = 0; g_idx < gates_size; g_idx++) {
+            if (!env->hpa_h.inter_cache.count(g_idx))
                 compute_inter_from(env, g_idx);
-            }
         }
     }
 

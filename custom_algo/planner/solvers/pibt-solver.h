@@ -19,7 +19,6 @@ namespace CustomAlgo {
             void plan(int time_limit, std::vector<Action>& actions, SharedEnvironment* env ) ;
 
         private:
-
             std::vector<int> decision;
             std::vector<int> prev_decision;
             std::vector<double> p;

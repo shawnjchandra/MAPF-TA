@@ -1,0 +1,8 @@
+{
+    "mapFile": "maps/dinding.map",
+    "agentFile": "agents/dinding_bench_2.agents",
+    "teamSize": 2,
+    "taskFile": "tasks/dinding_bench.tasks",
+    "numTasksReveal": 1.5,
+    "version": "2024 LoRR"
+}

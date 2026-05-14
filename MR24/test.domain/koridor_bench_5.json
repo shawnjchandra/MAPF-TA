@@ -1,0 +1,8 @@
+{
+    "mapFile": "maps/koridor.map",
+    "agentFile": "agents/koridor_bench_5.agents",
+    "teamSize": 5,
+    "taskFile": "tasks/koridor_bench.tasks",
+    "numTasksReveal": 1.5,
+    "version": "2024 LoRR"
+}

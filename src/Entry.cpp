@@ -17,11 +17,14 @@ void Entry::initialize(int preprocess_time_limit)
 
 void Entry::compute(int time_limit, std::vector<Action> & plan, std::vector<int> & proposed_schedule)
 {
-    scheduler->plan(time_limit, proposed_schedule);
+    int scheduler_time_limit = 0.75 * time_limit;
+    int planner_time_limit = time_limit - scheduler_time_limit;
 
+    scheduler->plan(scheduler_time_limit, proposed_schedule);
+    
     update_goal_locations(proposed_schedule);
-
-    planner->plan(time_limit,plan);
+    
+    planner->plan(planner_time_limit,plan);
 }
 
 // Set the next goal locations for each agent based on the proposed schedule

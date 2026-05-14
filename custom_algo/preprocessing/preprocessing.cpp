@@ -2,6 +2,11 @@
 #include <chrono>
 
 void Preprocessing::initialize(int preprocess_time_limit) {
+    auto elapsed = [&](TimePoint from) {
+        return std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::steady_clock::now() - from).count();
+        };
+    TimePoint t = std::chrono::steady_clock::now();
     env->rng.seed(0);
     srand(0);
  
@@ -29,5 +34,6 @@ void Preprocessing::initialize(int preprocess_time_limit) {
     // Fase 5 : generateOffset
     std::vector<int> offsets = CustomAlgo::generateOffset(env->r, env->cols);
     env->offsets = offsets;
- 
+
+    fprintf(stderr, "Preprocessing selese :     %ldms\n", env->curr_timestep, elapsed(t));
 }

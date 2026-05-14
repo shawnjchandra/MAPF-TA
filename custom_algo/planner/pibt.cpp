@@ -14,23 +14,34 @@ namespace CustomAlgo {
           dari agen. Updatenya setiap commit / step. Bertujuan untuk agen yang lagi
           rotasi, ga dikenain plan.
 
+        PORTING NOTES (dari causalPIBT original framework):
+        - TrajLNS dihapus; heuristik sekarang via query_heuristic() + GCM weight
+          dari env->planner_state.gcm (sama seperti sebelumnya di versi kamu).
+        - get_gp_h() diganti langsung dengan query_heuristic() + GCM weighting.
+        - occupied[] sekarang di-set untuk curr_id kalau higher_id == -1 (agen pertama
+          di chain), persis seperti original causalPIBT.
+        - Backtrack sekarang eksplisit: reset next_states[curr_id] dan decision[],
+          sama persis dengan original (kamu sebelumnya comment-out bagian ini).
+        - Bug fix: `decision[cand.location != -1]` → `decision[cand.location] != -1`
+        - validateMove di-skip untuk wait candidate (prev_loc == cand.location),
+          sama seperti original yang tidak assert validateMove untuk wait.
     */
 
     /**
      * @brief Fungsi rekursif causal PIBT. Di-port dari causalPIBT() original framework,
      *        tanpa TrajLNS. Menggunakan query_heuristic() + GCM dari planner_state.
      *
-     * @param curr_id       
-     * @param higher_id     
-     * @param prev_states   
-     * @param next_states   
-     * @param prev_decision 
-     * @param decision      
-     * @param occupied      
-     * @param goal_per_agents 
-     * @param env           
-     * @return true  
-     * @return false 
+     * @param curr_id       agen yang sedang diproses
+     * @param higher_id     agen yang memanggil (priority lebih tinggi), -1 jika root
+     * @param prev_states   state agen di timestep sekarang
+     * @param next_states   state agen di timestep selanjutnya (diisi oleh PIBT)
+     * @param prev_decision peta lokasi → agen yang ada di sana sekarang
+     * @param decision      peta lokasi → agen yang akan menuju ke sana
+     * @param occupied      lokasi yang dikunci (anti-cycle untuk agen root)
+     * @param goal_per_agents goal location per agen
+     * @param env           shared environment
+     * @return true  jika berhasil menemukan move
+     * @return false jika gagal (caller harus backtrack)
      */
     bool pibt(
         int curr_id,
@@ -82,7 +93,7 @@ namespace CustomAlgo {
             int hw_penalty = 0;
             if (env->hpa_h.hw.r_e_hw.count({prev_loc, nb_orient})) hw_penalty = env->c_penalty;
             
-            int weighted_h = (gcm_w * h) + wait_penalty + hw_penalty;
+            int weighted_h = (int)(gcm_w * h) + wait_penalty + hw_penalty;
 
             candidates.push_back(PIBT_C(nb, weighted_h, nb_orient, rand()));
         }
@@ -92,10 +103,10 @@ namespace CustomAlgo {
         int h          = query_heuristic(env, prev_loc, prev_orient, goal_agent);
         float gcm_w    = env->planner_state.gcm[prev_loc][prev_orient];
         int wait_penalty = env->planner_state.wait_map[prev_loc][prev_orient];
-        int weighted_h = (gcm_w * h) + wait_penalty;
+        int weighted_h = (int)(gcm_w * h) + wait_penalty;
 
         if (prev_loc == goal_agent) weighted_h += 1;
-        if (p[curr_id] > 5.0) weighted_h += (p[curr_id]);
+        if (p[curr_id] > 5.0) weighted_h += (int)(p[curr_id]);
         candidates.push_back(PIBT_C(prev_loc, weighted_h, prev_orient, rand()));
         
 
@@ -144,7 +155,7 @@ namespace CustomAlgo {
                           prev_states, next_states,
                           prev_decision, decision,
                           occupied, goal_per_agents, env, p)) {
-                    // Backtrack & reset dulu lokasi candidatenya..
+                    // Backtrack
                     next_states[curr_id] = State(-1, -1, -1);
                     decision[cand.location] = -1;
                     continue;

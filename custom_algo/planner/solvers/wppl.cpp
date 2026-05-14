@@ -4,20 +4,18 @@
 #include "heuristics.h"
 #include "guidance_cost_map.h"
 #include "const.h"
-#include "highway.h"
 
 namespace CustomAlgo {
     
     // Copy yang pibt 
     void WPPLSolver::initialize(int preprocess_time_limit, SharedEnvironment* env) {
-        int map_size   = env->map.size();
+         int map_size   = env->map.size();
         int agent_size = env->num_of_agents;
-
+ 
         assert(agent_size != 0);
  
         auto& ps = env->planner_state;
-
-        ps.w = std::max(3, env->w);
+        // env->w = std::max(3, env->w);
         // ps.h = std::max(1, ps.h);
         // env->horizon = ps.h;
  
@@ -28,8 +26,6 @@ namespace CustomAlgo {
             int orient = key.second;
             ps.gcm[loc][orient] = (float)env->c_penalty;
         }
-
-        // env->m = max(env->m,8);
  
         ps.wait_map.assign(map_size, {0, 0, 0, 0});
         ps.w_peak.resize(map_size);
@@ -109,7 +105,7 @@ namespace CustomAlgo {
      * @param env 
      */
     void WPPLSolver::shift_plan(LNSState& lns_state, int h, SharedEnvironment* env) {
-        int w = env->planner_state.w;
+        int w = env->w;
         int n = env->num_of_agents;
 
         if (lns_state.lns_plan.plan.size() <= h) {
@@ -189,7 +185,7 @@ namespace CustomAlgo {
      */
     std::vector<int> WPPLSolver::destroy_agent_based(LNSState& lns_state, int N, SharedEnvironment* env) {
         int n = env->num_of_agents;
-        int w = env->planner_state.w;
+        int w = env->w;
 
         std::vector<std::pair<int,int>> wait_counts(n);
 
@@ -311,7 +307,7 @@ namespace CustomAlgo {
      */
     void WPPLSolver::repair(LNSState& lns_state, std::vector<int>& destroyed_agents, SharedEnvironment* env) {
         auto& ps = env->planner_state;
-        int w = ps.w;
+        int w = env->w;
         int n = env->num_of_agents;
         int map_size = env->map.size();
  
@@ -394,10 +390,13 @@ namespace CustomAlgo {
      * @param deadline 
      */
     void WPPLSolver::run_iterations(LNSState& lns_state, SharedEnvironment* env, TimePoint deadline) {
-
+        auto elapsed = [&](TimePoint from) {
+        return std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::steady_clock::now() - from).count();
+        };
         // Single threaded
 
-        // int w = env->planner_state.w;
+        // int w = env->w;
         // int n = env->num_of_agents;
         // int N = n / 10; //Neighbourhood fixed di 10% dulu
 
@@ -426,20 +425,25 @@ namespace CustomAlgo {
 
         // }
 
+        
+        
+        
         //Multi threaded
         int n = env->num_of_agents;
-        int w = env->planner_state.w;
+        int w = env->w;
         int N = n / 10;
         
         std::mutex mtx;
- 
+        static std::atomic<int> calls{0};
+        calls.store(0);
+
         std::vector<std::thread> threads;
         for (int i = 0 ; i < env->m ; i++) {
-            threads.emplace_back([&, i](){
+            threads.emplace_back([&](){
                 
                 // arbitrary number (angka random), mastiin setiap thread beda
                 std::mt19937 rng(i * 99);
- 
+                
                 while (std::chrono::steady_clock::now() < deadline ){ 
                     LNSState local_copy;
                     
@@ -448,30 +452,40 @@ namespace CustomAlgo {
                         std::lock_guard<std::mutex> lk(mtx);
                         local_copy = lns_state;
                     }
- 
+                    // TimePoint t1 = std::chrono::steady_clock::now();
+                    
                     DESTROYHEURISTIC h = local_copy.select_heuristic(rng);
                     auto destroyed_agents = destroy_agents(h, local_copy, N, rng, env);
+                    // TimePoint t2 = std::chrono::steady_clock::now();
                     repair(local_copy, destroyed_agents, env);
- 
+                    calls++;
+                    // fprintf(stderr, "[t=%d] REPAIR :     %ldms\n", env->curr_timestep, elapsed(t2));
+
+                    // fprintf(stderr, "[t=%d] Destroyed :     %ldms\n", env->curr_timestep, elapsed(t1));
+                    
+                    
                     int new_soc = compute_soc(local_copy, w, env);
                     int dif_soc = local_copy.best_soc - new_soc;
                     
-                    // 
+                    // TimePoint t2 = std::chrono::steady_clock::now();
+                    //
                     {
                         std::lock_guard<std::mutex> lk(mtx);
                         lns_state.update_weight(h, dif_soc);
- 
+                        
                         if (new_soc  < lns_state.best_soc) {
                             lns_state.best_soc = new_soc;
                             lns_state.lns_plan = local_copy.lns_plan;
                         }
                     }
+                    // fprintf(stderr, "[t=%d] Destroyed_Update :     %ldms\n", env->curr_timestep, elapsed(t1));
                 }
             });
+            
         }
- 
-        for (auto& t : threads) t.join();
         
+        for (auto& t : threads) t.join();
+        fprintf(stderr, "[t=%d] Jumlah Repair :     %ld\n", env->curr_timestep, calls.load());
     }
 
     /**
@@ -557,17 +571,25 @@ namespace CustomAlgo {
      * @param env 
      */
     void WPPLSolver::plan(int time_limit, vector<Action>& actions, SharedEnvironment* env) {
+        fprintf(stderr, "Window Size : %d, Number of Thread : %d\n", env->w, env->m);
+
         TimePoint start_time = std::chrono::steady_clock::now();
+        auto elapsed = [&](TimePoint from) {
+        return std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::steady_clock::now() - from).count();
+        };
 
         auto& ps = env->planner_state;
         int n = env->num_of_agents;
-        int w = ps.w;
+        int w = env->w;
 
         //Sebagian copy PIBT
-        int pibt_time = PIBT_RUNTIME_PER_100_AGENTS * env->num_of_agents / 100;
-        if (pibt_time <= 0) pibt_time = 1;
+        // int pibt_time = PIBT_RUNTIME_PER_100_AGENTS * env->num_of_agents / 100;
+        // if (pibt_time <= 0) pibt_time = 1;
+         TimePoint t0 = std::chrono::steady_clock::now();
 
-        TimePoint deadline = start_time + std::chrono::milliseconds(time_limit - pibt_time);
+        int extract_time = 100;
+        TimePoint deadline = start_time + std::chrono::milliseconds(time_limit - extract_time);
 
         // Reset tiap timestep state 
         prev_decision.assign(env->map.size(), -1);
@@ -611,6 +633,8 @@ namespace CustomAlgo {
                 p[a] += 10.0;
             }
         }
+        fprintf(stderr, "[t=%d] Fase 0 (ya gitulah): %ldms\n", env->curr_timestep, elapsed(t0));
+
 
         // sort descending, utamain yang priority tinggi
         std::sort(ids.begin(), ids.end(), [&](int a, int b) {
@@ -618,6 +642,7 @@ namespace CustomAlgo {
         });
 
         // Fase 1 : w timestep plan (simulasi pertama)
+         TimePoint t1 = std::chrono::steady_clock::now();
         LNSPlan& lns_plan = this->lns_state.lns_plan;
 
         if (lns_state.has_cached_plan) {
@@ -632,12 +657,19 @@ namespace CustomAlgo {
         } else {
             lns_state = run_pibt_window(env, w);
         }
+
+        fprintf(stderr, "[t=%d] Fase1 (pibt window): %ldms\n", env->curr_timestep, elapsed(t1));
+
+
         //Fase 2 : LNS
+        TimePoint t2 = std::chrono::steady_clock::now();
         if (std::chrono::steady_clock::now() < deadline) {
             run_iterations(lns_state, env, deadline);
         }
+        fprintf(stderr, "[t=%d] Fase2 (LNS):         %ldms\n", env->curr_timestep, elapsed(t2));
 
         //Fase 3 : Extract actions
+        TimePoint t3 = std::chrono::steady_clock::now();
         actions.resize(n);
 
         //Tolak agen dengan tujuan yang udah di claim, atau obstacle, bukan posisi bersebelahan atau lokasi invalid lainnya. Nge utamain dari current_states
@@ -698,6 +730,10 @@ namespace CustomAlgo {
             if (!checked[a] && actions[a] == Action::FW) 
                 moveCheck(a, checked, decided, actions, prev_decision);
         }
+        fprintf(stderr, "[t=%d] Fase3 (extract):     %ldms\n", env->curr_timestep, elapsed(t3));
+
+
+    
 
         // Fase 4 : cache sisa plan sebagai warm up
         shift_plan(lns_state, 1, env);
@@ -711,12 +747,10 @@ namespace CustomAlgo {
             gcm_update( env, env->curr_states[a].location, env->curr_states[a].orientation, env->curr_timestep);
         }
 
-        // Swap highways
-        // if (env->curr_timestep > 0 && env->curr_timestep % env->fswap == 0)reverseHighways(env);
-
         if (env->curr_timestep > 0 && env->curr_timestep % ps.gcm_freq == 0) {
             for (auto& loc : ps.wait_map) loc.fill(0);
         }
+        fprintf(stderr, "[t=%d] TOTAL: %ldms / limit: %dms\n", env->curr_timestep, elapsed(start_time), time_limit);
     }
 
 

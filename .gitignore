@@ -8,6 +8,6 @@ test.txt
 python/tmp
 python/__pycache__
 output.json
+output/
 
-map_dumper.*
-tools/
+config.sh

@@ -165,8 +165,6 @@ namespace CustomAlgo{
 	};
 
 	struct PlannerState{
-		int w;	//Planning horizon / window size
-		int h;  //Replan Period
 
 		//GCM[loc][orient] untuk heat mapnya
 		std::vector<std::array<float,4>> gcm;
@@ -205,11 +203,6 @@ namespace CustomAlgo{
 		// //Disabled Agents (lokasi dead-end). Dari paper, dan github. Jika exit dan entry hanya ada satu. Mencegah deadlock
 		// std::unordered_set<int> disabled;
 
-
-		//Data dari PIBT
-		std::vector<double> priorities;
-		std::vector<double> priorities_base;
-		// std::vector<DCR> decided;
 	};
 
 	// enum class DestroyHeuristic { AGENT_BASED, RANDOM, MAP_BASED, COUNT };

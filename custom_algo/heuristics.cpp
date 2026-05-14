@@ -1,6 +1,6 @@
 #include "heuristics.h"
 #include <queue>
-#include "hpa.h"
+#include "preprocessing/hpa.h"
 
 namespace CustomAlgo{
     //Diambil dari framework standard
@@ -57,14 +57,14 @@ namespace CustomAlgo{
         if (env->hpa_h.IntraHT[c_dest].find(dest_local) == env->hpa_h.IntraHT[c_dest].end()) {
                 
             auto ht = build_IntraHT(env, c_dest, dest);
-            {
-                std::lock_guard<std::mutex> lk(env->hpa_cache_mtx);
-                env->hpa_h.IntraHT[c_dest][dest_local] = std::vector<std::array<int,4>>(ht.begin(), ht.end());
-            }
+            env->hpa_h.IntraHT[c_dest][dest_local] = std::vector<std::array<int,4>>(ht.begin(), ht.end());
         }
 
         //IntraHT (Jika destination dan source dalam cluster yang sama)
         if (c_src == c_dest) {
+
+            // Validasi source dan destionation secara lokal
+            int cluster_size = env->hpa_h.local_to_global[c_src].size();
 
             // Lazy compute jika belum ada , tapi seharusnya udah ada karena c_dest = c_src ,dan c_dest sudah dicari sebelumnya
             if (env->hpa_h.IntraHT[c_src].find(dest_local) == 
@@ -73,13 +73,8 @@ namespace CustomAlgo{
                 if (env->hpa_h.IntraHT[c_src].find(dest_local) == 
                     env->hpa_h.IntraHT[c_src].end()) {
                     auto ht = build_IntraHT(env, c_src, dest);
-
-                    {
-                        std::lock_guard<std::mutex> lk(env->hpa_cache_mtx);
-                        
-                        env->hpa_h.IntraHT[c_src][dest_local] = 
+                    env->hpa_h.IntraHT[c_src][dest_local] = 
                         std::vector<std::array<int,4>>(ht.begin(), ht.end());
-                    }
                 }
             }
 
@@ -98,7 +93,6 @@ namespace CustomAlgo{
 
             int g_s_local = env->hpa_h.global_to_local[g_s];
             int g_s_idx   = env->hpa_h.AG.gate_index[g_s];
-            
             if (g_s_idx >= INTERVAL_MAX) continue;
 
                 //Validasi awal (cek udah dihitung atau belum)
@@ -107,13 +101,8 @@ namespace CustomAlgo{
 
                 // lazy compute IntraHT for this gate as destination
                 auto ht = CustomAlgo::build_IntraHT(env, c_src, g_s);
-
-                {
-                    std::lock_guard<std::mutex> lk(env->hpa_cache_mtx);
-
-                    env->hpa_h.IntraHT[c_src][g_s_local] =
+                env->hpa_h.IntraHT[c_src][g_s_local] =
                     std::vector<std::array<int,4>>(ht.begin(), ht.end());
-                }
             }
                 
             int cluster_size_src = env->hpa_h.local_to_global[c_src].size();
@@ -128,12 +117,7 @@ namespace CustomAlgo{
             //Cek InterHT, dari gate cluster source udah pernah dihitung atau belum. Kalau belum, compute dan cache
             if (env->hpa_h.inter_cache.find(g_s_idx) == 
             env->hpa_h.inter_cache.end()) {
-                {
-                    std::lock_guard<std::mutex> lk(env->hpa_cache_mtx);
-
-                    CustomAlgo::compute_inter_from(env, g_s_idx);
-                }
-                // continue; // Skip.. dulu, untuk cek kalau pakai full compute dari awal..
+                CustomAlgo::compute_inter_from(env, g_s_idx);
             }
 
             // Untuk setiap gate pada cluster tujuan
@@ -148,12 +132,8 @@ namespace CustomAlgo{
                 env->hpa_h.IntraHT[c_dest].end()) {
 
                     auto ht = CustomAlgo::build_IntraHT(env, c_dest, g_d);
-                    {
-                        std::lock_guard<std::mutex> lk(env->hpa_cache_mtx);
-                    
-                        env->hpa_h.IntraHT[c_dest][g_d_local] =
+                    env->hpa_h.IntraHT[c_dest][g_d_local] =
                         std::vector<std::array<int,4>>(ht.begin(), ht.end());
-                    }
                 }
 
                 

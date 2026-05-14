@@ -9,7 +9,6 @@
 #include <memory>
 #include "map_dumper.h"
 
-
 #ifdef PYTHON
 #if PYTHON
 #include "pyMAPFPlanner.hpp"
@@ -31,8 +30,8 @@ void sigint_handler(int a)
     fprintf(stdout, "stop the simulation...\n");
     system_ptr->saveResults(vm["output"].as<std::string>(),vm["outputScreen"].as<int>());
     if (vm.count("dumpMaps") && vm["dumpMaps"].as<bool>() && g_planner != nullptr) {
-        CustomAlgo::dump_maps(g_planner->env, vm["output"].as<std::string>());
-    }
+    CustomAlgo::dump_maps(g_planner->env, vm["output"].as<std::string>());
+}
     _exit(0);
 }
 
@@ -61,14 +60,12 @@ int main(int argc, char **argv)
         ("numberOfCluster,k", po::value<int>()->default_value(10), "the number of cluster used in the voronoi map generation")
         ("radius,r", po::value<int>()->default_value(5), "the number of cluster used in the voronoi map generation")
         ("limitNumHW,lnhw", po::value<int>()->default_value(INTERVAL_MAX), "the limit for the number of highway edges")
-        ("fswap", po::value<int>()->default_value(10), "timestep frequency to reverse the highway direction")
-        ("c", po::value<int>()->default_value(2), "constant for going against the highway edges")
-        ("isSoftHW", po::value<bool>()->default_value(true), "Default Highways Configuration")
-        ("w", po::value<int>()->default_value(10), "Windowed Size for Planning")
-        ("h", po::value<int>()->default_value(1), "Replanning Period")
-        ("m", po::value<int>()->default_value(8), "Number of Thread Worker for DROP-LNS")
-        ("mode", po::value<string>()->default_value("wppl"), "solver mode. wppl / pibt (lowercase)")
-        ("dumpMaps", po::value<bool>()->default_value(true), "dump heatmap/voronoi/highway/HPA ke <output>.maps.json saat simulasi selesai");
+        ("cPenalty", po::value<int>()->default_value(2), "constant for going against the highway edges")
+        ("window", po::value<int>()->default_value(10), "Windowed Planning")
+        ("threads", po::value<int>()->default_value(3), "threads")
+        ("horizon", po::value<int>()->default_value(1), "Replanning Period")
+        ("dumpMaps", po::value<bool>()->default_value(true), "dump heatmap/voronoi/highway/HPA ke <output>.maps.json saat simulasi selesai")
+        ("mode", po::value<string>()->default_value("wppl"), "solver mode. wppl / pibt (lowercase)");
     clock_t start_time = clock();
     po::store(po::parse_command_line(argc, argv, desc), vm);
 
@@ -122,20 +119,16 @@ int main(int argc, char **argv)
     if (planner == nullptr) {
         planner = new Entry();
     }
-    g_planner = planner;
+    g_planner = planner; 
     // Modifikasi
     planner->env->k         = vm["numberOfCluster"].as<int>();
     planner->env->r         = vm["radius"].as<int>();
+    planner->env->w         = vm["window"].as<int>();
+    planner->env->m         = vm["threads"].as<int>();
+    planner->env->h         = vm["horizon"].as<int>();
+    planner->env->c_penalty = vm["cPenalty"].as<int>();
     planner->env->max_hw = vm["limitNumHW"].as<int>();
     planner->env->mode = vm["mode"].as<string>();
-    planner->env->w = vm["w"].as<int>();
-    planner->env->h = vm["h"].as<int>();
-    planner->env->m = vm["m"].as<int>();
-    planner->env->fswap = vm["fswap"].as<int>();
-    
-    bool isSoftHW = vm["isSoftHW"].as<bool>();
-    if(isSoftHW) planner->env->c_penalty = vm["c"].as<int>();
-    else planner->env->c_penalty = INTERVAL_MAX*10;
 
     auto input_json_file = vm["inputFile"].as<std::string>();
     json data;
