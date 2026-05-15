@@ -37,8 +37,7 @@ public:
     int r; //radius
     int max_hw; //Limiting the amount of highways generated
 
-    int w;
-    int h;
+
 
     //Scheduling
     std::vector<int> agent_starts;
@@ -60,7 +59,8 @@ public:
     string mode;
 
     CustomAlgo::PlannerState planner_state;
-    int horizon;
+    int w;
+    int h;
     int m; //Jumlah thread Worker
     int N_prctg; // Neighborhood size percentage (LNS)
     float gamma; // Variabel untuk update weights dari DestroyHeuristics

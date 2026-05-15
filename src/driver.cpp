@@ -125,7 +125,9 @@ int main(int argc, char **argv)
     planner->env->r         = vm["radius"].as<int>();
     planner->env->w         = vm["window"].as<int>();
     planner->env->m         = vm["threads"].as<int>();
-    planner->env->h         = vm["horizon"].as<int>();
+
+    int h = vm["horizon"].as<int>();
+    planner->env->h         = max(1, min(planner->env->w, h)); //Pastiin 1 <= h <= w
     planner->env->c_penalty = vm["cPenalty"].as<int>();
     planner->env->max_hw = vm["limitNumHW"].as<int>();
     planner->env->mode = vm["mode"].as<string>();

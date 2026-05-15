@@ -10,23 +10,23 @@ prompt() {
 }
 
 do_compile() {
-    echo "=== Compile ==="
+    echo "=== Compile & Build ==="
     (cd "$ROOT" && bash build.sh)
     read -rp "Press Enter to continue..."
 }
 
 do_run() {
-    echo "=== Select Domain ==="
+    echo "=== Select Problem Domain ==="
     select domain in "$PROBLEMS_DIR"/*/; do
         [[ -n "$domain" ]] && break
     done
 
-    echo "=== Select Problem ==="
+    echo "=== Select Problem Instance ==="
     select problem in "$domain"*.json; do
         [[ -n "$problem" ]] && break
     done
 
-    echo "=== Parameters (Enter to keep default) ==="
+    echo "=== Hyperparameters (Enter to keep default) ==="
 
     # derive output path
     domain_name=$(basename "$domain" .domain)
@@ -40,14 +40,15 @@ do_run() {
     fi
 
     SIM=$(prompt     "Simulation time"      "5")
-    PLAN_TL=$(prompt "Plan time limit"      "60000")
     PRE_TL=$(prompt  "Preprocess TL"        "600000")
-    CLUSTERS=$(prompt "Num clusters"        "400")
-    RADIUS=$(prompt   "Radius"              "3")
+    PLAN_TL=$(prompt "Plan time limit"      "60000")
+    CLUSTERS=$(prompt "Num of clusters (Large Map)"        "400")
+    RADIUS=$(prompt   "Radius DBC"              "3")
     PENALTY=$(prompt  "cPenalty"            "2")
-    MODE=$(prompt     "Mode"                "wppl")
+    MODE=$(prompt     "Mode (wppl/pibt)"                "wppl")
     WINDOW=$(prompt   "Window"              "10")
-    THREADS=$(prompt  "Threads"             "3")
+    HORIZON=$(prompt  "Horizon"             "1")
+    THREADS=$(prompt  "Thread Workers (Cores)"             "3")
     OUT_NAME=$(prompt "Output name"          "$problem_name")
 
     out_file="$default_out/$OUT_NAME.json"
@@ -64,6 +65,7 @@ do_run() {
         --cPenalty "$PENALTY" \
         --mode "$MODE" \
         --window "$WINDOW" \
+        --horizon "$HORIZON" \
         --threads "$THREADS"
 
     echo

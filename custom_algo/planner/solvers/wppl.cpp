@@ -571,7 +571,7 @@ namespace CustomAlgo {
      * @param env 
      */
     void WPPLSolver::plan(int time_limit, vector<Action>& actions, SharedEnvironment* env) {
-        fprintf(stderr, "Window Size : %d, Number of Thread : %d\n", env->w, env->m);
+        fprintf(stderr, "Window Size : %d, Number of Thread : %d, Horizon : %d\n ", env->w, env->m ,env->h);
 
         TimePoint start_time = std::chrono::steady_clock::now();
         auto elapsed = [&](TimePoint from) {
@@ -642,10 +642,32 @@ namespace CustomAlgo {
         });
 
         // Fase 1 : w timestep plan (simulasi pertama)
-         TimePoint t1 = std::chrono::steady_clock::now();
+        TimePoint t1 = std::chrono::steady_clock::now();
+        
+        
+        bool should_replan = !lns_state.has_cached_plan || (env->curr_timestep % env->h == 0);
         LNSPlan& lns_plan = this->lns_state.lns_plan;
+        
+        // if (lns_state.has_cached_plan) {
+        //     lns_plan = lns_state.cached_plan;
 
-        if (lns_state.has_cached_plan) {
+        //     // Masukkan cached plan lalu resync pada step 0 dengan kondisi pada saat ini
+        //     for (int a = 0 ; a < n ; a++) {
+        //         lns_plan.plan[0][a] = env->curr_states[a];
+        //     }
+
+        //     sync_condition(lns_state, env);
+        // } else {
+        //     lns_state = run_pibt_window(env, w);
+        // }
+
+        if (should_replan) {
+            lns_state = run_pibt_window(env, w);
+            if (std::chrono::steady_clock::now() < deadline) {
+                run_iterations(lns_state, env, deadline);
+            }
+
+        } else {
             lns_plan = lns_state.cached_plan;
 
             // Masukkan cached plan lalu resync pada step 0 dengan kondisi pada saat ini
@@ -654,19 +676,17 @@ namespace CustomAlgo {
             }
 
             sync_condition(lns_state, env);
-        } else {
-            lns_state = run_pibt_window(env, w);
         }
 
         fprintf(stderr, "[t=%d] Fase1 (pibt window): %ldms\n", env->curr_timestep, elapsed(t1));
 
 
         //Fase 2 : LNS
-        TimePoint t2 = std::chrono::steady_clock::now();
-        if (std::chrono::steady_clock::now() < deadline) {
-            run_iterations(lns_state, env, deadline);
-        }
-        fprintf(stderr, "[t=%d] Fase2 (LNS):         %ldms\n", env->curr_timestep, elapsed(t2));
+        // TimePoint t2 = std::chrono::steady_clock::now();
+        // if (std::chrono::steady_clock::now() < deadline) {
+        //     run_iterations(lns_state, env, deadline);
+        // }
+        // fprintf(stderr, "[t=%d] Fase2 (LNS):         %ldms\n", env->curr_timestep, elapsed(t2));
 
         //Fase 3 : Extract actions
         TimePoint t3 = std::chrono::steady_clock::now();

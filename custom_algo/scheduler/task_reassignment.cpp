@@ -28,9 +28,9 @@ namespace CustomAlgo{
         
         // int MAX_TRIES = 0.25 * env->task_pool.size();
         // int MAX_TRIES = 300;
-        int original_size = agt_dtr.size();
+        // int original_size = agt_dtr.size();
         
-        for (int dtr_i = 0 ; dtr_i < original_size && elapsed(start) < time_limit ; dtr_i++) {
+        for (int dtr_i = 0 ; dtr_i < agt_dtr.size() && elapsed(start) < time_limit ; dtr_i++) {
             int agt_id = agt_dtr[dtr_i];
             
             int best_task = -1;

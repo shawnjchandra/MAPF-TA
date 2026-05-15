@@ -196,13 +196,13 @@ namespace CustomAlgo {
 
 
         // DTR
-        schedule_tasks(remaining_time*0.6 ,agt_dtr, env, proposed_schedule, gamma, reserved_set, not_opened_tasks);
+        schedule_tasks(remaining_time*0.9 ,agt_dtr, env, proposed_schedule, gamma, reserved_set, not_opened_tasks);
         fprintf(stderr, "[t=%d] Scheduling 5: %ldms\n", env->curr_timestep, elapsed(current_time));
 
         TimePoint t6 = std::chrono::steady_clock::now();
     
         //Chaining
-        chaining_task(remaining_time*0.4, opened_agt, env, proposed_schedule, gamma, reserved_set, not_opened_tasks);
+        chaining_task(remaining_time*0.1, opened_agt, env, proposed_schedule, gamma, reserved_set, not_opened_tasks);
         fprintf(stderr, "[t=%d] Scheduling 6: %ldms\n", env->curr_timestep, elapsed(t6));
      
         fprintf(stderr, "[t=%d] TOTAL: %ldms / limit: %dms\n", env->curr_timestep, elapsed(start_time), time_limit);
