@@ -172,7 +172,7 @@ namespace CustomAlgo{
 		//[loc][orient] untuk
 		std::vector<std::array<int,4>> wait_map;
 	
-		int gcm_freq = 5; // update wait_map setiap F frequency
+		int gcm_freq = 20; // update wait_map setiap F frequency
 
 		//Struct untuk simpen nilai wait_peak setiap lokasi
 		struct PeakInfo{

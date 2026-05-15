@@ -4,6 +4,7 @@
 #include "heuristics.h"
 #include "guidance_cost_map.h"
 #include "const.h"
+#include "highway.h"
 
 namespace CustomAlgo {
     
@@ -769,7 +770,10 @@ namespace CustomAlgo {
 
         if (env->curr_timestep > 0 && env->curr_timestep % ps.gcm_freq == 0) {
             for (auto& loc : ps.wait_map) loc.fill(0);
+            reverseHighways(env);
         }
+
+
         fprintf(stderr, "[t=%d] TOTAL: %ldms / limit: %dms\n", env->curr_timestep, elapsed(start_time), time_limit);
     }
 
