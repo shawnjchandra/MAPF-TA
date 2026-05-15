@@ -36,6 +36,9 @@ include_directories("custom_algo/planner/solvers")
 include_directories("custom_algo/planner/WPPL")
 include_directories("custom_algo/scheduler")
 
+# khusus tools.
+include_directories("tools")
+
 file(GLOB SOURCES "src/*.cpp" 
                     "custom_algo/*.cpp" 
                     "custom_algo/preprocessing/*.cpp"
@@ -43,6 +46,7 @@ file(GLOB SOURCES "src/*.cpp"
                     "custom_algo/planner/solvers/*.cpp"
                     "custom_algo/planner/WPPL/*.cpp"
                     "custom_algo/scheduler/*.cpp"
+                    "tools/*.cpp"
                     )
 
 
