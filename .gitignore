@@ -11,4 +11,4 @@ output.json
 output/
 
 config.sh
-tools/
+# tools/
