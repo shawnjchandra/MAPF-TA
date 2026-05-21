@@ -63,7 +63,7 @@ do_run() {
         --numberOfCluster "$CLUSTERS" \
         --radius "$RADIUS" \
         --cPenalty "$PENALTY" \
-        --mode "$MODE" \
+        --mode "wppl" \
         --window "$WINDOW" \
         --horizon "$HORIZON" \
         --threads "$THREADS"

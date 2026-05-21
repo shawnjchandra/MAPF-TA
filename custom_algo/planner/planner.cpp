@@ -8,18 +8,8 @@ namespace CustomAlgo {
     static std::unique_ptr<Solver> solver;
 
     void planner_initialize(int preprocess_time_limit, SharedEnvironment* env) {
-        const string& mode = env->mode;
-
-        if (mode == "wppl") {
-            solver = std::make_unique<WPPLSolver>();
-        } else if (mode == "pibt") {    
-            solver = std::make_unique<PIBTSolver>();
-
-        } else { //TRAJLNS
-            
-            solver = std::make_unique<PIBTSolver>();
-        }
-
+        //Ubah jadi non-selective aja deh, hanya bisa wppl        
+        solver = std::make_unique<WPPLSolver>();
         solver->initialize(preprocess_time_limit, env);
     }
 
