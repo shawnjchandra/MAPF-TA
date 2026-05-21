@@ -27,7 +27,6 @@ Entry* g_planner = nullptr;
 
 void sigint_handler(int a)
 {
-    fprintf(stdout, "stop the simulation...\n");
     system_ptr->saveResults(vm["output"].as<std::string>(),vm["outputScreen"].as<int>());
     if (vm.count("dumpMaps") && vm["dumpMaps"].as<bool>() && g_planner != nullptr) {
     CustomAlgo::dump_maps(g_planner->env, vm["output"].as<std::string>());

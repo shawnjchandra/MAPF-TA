@@ -4,7 +4,7 @@ namespace CustomAlgo {
     void gcm_update(SharedEnvironment* env ,int loc, int orient, int curr_timestep){
         float wait_rate = (float)env->planner_state.wait_map[loc][orient] / (float)env->planner_state.gcm_freq;
         
-        float w =(1-env->alpha) * env->planner_state.gcm[loc][orient] + env->alpha * wait_rate;
+        float w = (1-env->alpha) * env->planner_state.gcm[loc][orient] + env->alpha * wait_rate;
         env->planner_state.gcm[loc][orient] = w;
         
         if (w > env->planner_state.w_peak[loc].val) {

@@ -53,13 +53,6 @@ namespace CustomAlgo {
             std::chrono::steady_clock::now() - from).count();
         };
 
-        
-       
-        //Sebagian copy PIBT
-        // int pibt_time = PIBT_RUNTIME_PER_100_AGENTS * env->num_of_agents / 100;
-        // if (pibt_time <= 0) pibt_time = 1;
-        TimePoint t0 = std::chrono::steady_clock::now();
-
         std::unordered_set<int> reserved_set;
         reserved_set.insert(env->reserved_task_schedule.begin(), env->reserved_task_schedule.end());
         reserved_set.erase(-1);
@@ -73,12 +66,9 @@ namespace CustomAlgo {
         //Selalu diisi sama task baru (task yang lama ga ada...)
         not_opened_tasks.insert(env->new_tasks.begin(), env->new_tasks.end());
 
-        fprintf(stderr, "[t=%d] Scheduling 0): %ldms\n", env->curr_timestep, elapsed(t0));
 
         
         //free tasks isinya gabungan task yang belum diassign dan sudah tapi belum diopen (selama next loc = 0)
-        TimePoint t1 = std::chrono::steady_clock::now();
-
         for (auto& [t_id, t] : env->task_pool) {
             // if (t.agent_assigned == -1 && t.t_completed < 0) {
             if (t.idx_next_loc == 0) { // Diisi sama assigned but not opened task.. jadi lengkap
@@ -87,13 +77,10 @@ namespace CustomAlgo {
             }
         }
         
-        fprintf(stderr, "[t=%d] Scheduling 1: %ldms\n", env->curr_timestep, elapsed(t1));
 
         for (int t_id : not_opened_tasks) {
             env->makespan.erase(t_id);
         }
-        TimePoint t2 = std::chrono::steady_clock::now();
-
         get_newly_completed_tasks(env, proposed_schedule, reserved_set);
 
         for (int t_id : env->newly_completed_tasks) {
@@ -111,7 +98,6 @@ namespace CustomAlgo {
 
             }
         }
-        fprintf(stderr, "[t=%d] Scheduling 2: %ldms\n", env->curr_timestep, elapsed(t2));
         
         env->newly_completed_tasks.clear();
         env->newly_completed_tasks.reserve(env->task_pool.size());
@@ -127,8 +113,6 @@ namespace CustomAlgo {
          * @brief Bagian utama, ambil agen sesuai kondisi masing-masing
          * 
          */
-        TimePoint t3 = std::chrono::steady_clock::now();
-
         std::vector<int> agt_dtr;
         std::vector<int> opened_agt;
 
@@ -178,18 +162,10 @@ namespace CustomAlgo {
             }
 
         }
-        fprintf(stderr, "[t=%d] Scheduling 3: %ldms\n", env->curr_timestep, elapsed(t3));
-
-        TimePoint t4 = std::chrono::steady_clock::now();
 
 
         //Update square density masing-masing cluster
         calc_square_density(env);
-        fprintf(stderr, "[t=%d] Scheduling 4: %ldms\n", env->curr_timestep, elapsed(t4));
-
-        TimePoint current_time = std::chrono::steady_clock::now();
-
-        // auto deadline = start_time + std::chrono::milliseconds(preprocess_time_limit);
 
         // 3/4 waktu untuk DTR dan DBC ,sisanya untuk planning (dengan gini, seharusnya 2 2 nya anytime)
         int remaining_time = (time_limit - (int)elapsed(start_time));
@@ -197,14 +173,9 @@ namespace CustomAlgo {
 
         // DTR
         schedule_tasks(remaining_time*0.9 ,agt_dtr, env, proposed_schedule, gamma, reserved_set, not_opened_tasks);
-        fprintf(stderr, "[t=%d] Scheduling 5: %ldms\n", env->curr_timestep, elapsed(current_time));
 
-        TimePoint t6 = std::chrono::steady_clock::now();
-    
         //Chaining
         chaining_task(remaining_time*0.1, opened_agt, env, proposed_schedule, gamma, reserved_set, not_opened_tasks);
-        fprintf(stderr, "[t=%d] Scheduling 6: %ldms\n", env->curr_timestep, elapsed(t6));
      
-        fprintf(stderr, "[t=%d] TOTAL: %ldms / limit: %dms\n", env->curr_timestep, elapsed(start_time), time_limit);
         }
 }

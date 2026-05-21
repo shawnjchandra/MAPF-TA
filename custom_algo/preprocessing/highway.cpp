@@ -24,9 +24,6 @@ namespace CustomAlgo{
 
         for (const Entrances& e : env->hpa_h.Ents) {
 
-            // Batas jumlah highway
-            if (done >= env->max_hw) break;
-
             int c_a = e.c_a;
             int c_b = e.c_b;
 

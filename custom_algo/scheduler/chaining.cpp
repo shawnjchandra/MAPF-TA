@@ -112,7 +112,6 @@ namespace CustomAlgo {
         for (int t_id : removed_task) {
             free_tasks.erase(t_id);
         }
-        fprintf(stderr, "Elapsed Time Chaining :     %ldms\n", elapsed(start));
 
     }
 }

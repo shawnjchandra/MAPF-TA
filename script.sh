@@ -40,15 +40,15 @@ do_run() {
     fi
 
     SIM=$(prompt     "Simulation time"      "5")
-    PRE_TL=$(prompt  "Preprocess TL"        "600000")
+    PRE_TL=$(prompt  "Preprocess time limit"        "600000")
     PLAN_TL=$(prompt "Plan time limit"      "60000")
     CLUSTERS=$(prompt "Num of clusters (Large Map)"        "400")
     RADIUS=$(prompt   "Radius DBC"              "3")
-    PENALTY=$(prompt  "cPenalty"            "2")
+    PENALTY=$(prompt  "Highway penalty"            "2")
 #    MODE=$(prompt     "Mode (wppl/pibt)"                "wppl")
     WINDOW=$(prompt   "Window"              "10")
     HORIZON=$(prompt  "Horizon"             "1")
-    THREADS=$(prompt  "Thread Workers (Cores)"             "3")
+    THREADS=$(prompt  "Thread Workers (Cores)"             "2")
     OUT_NAME=$(prompt "Output name"          "$problem_name")
 
     out_file="$default_out/$OUT_NAME.json"
