@@ -226,10 +226,6 @@ namespace CustomAlgo{
      * @param env 
      */
     void build_InterHT(SharedEnvironment* env) {
-    
-        // Build gate_index hanya pada pertama kali pemanggilan
-        // if (env->hpa_h.AG.gate_index.empty() ||
-        // env->hpa_h.AG.gate_index[env->hpa_h.AG.gates[0]] == INTERVAL_MAX) {
             
         env->hpa_h.AG.gate_index.assign(env->map.size(), INTERVAL_MAX);
 
@@ -323,23 +319,6 @@ namespace CustomAlgo{
     }
 
     void warmup_inter_cache(SharedEnvironment* env) {
-        // std::set<int> agent_clusters;
-        // for (int loc : env->agent_starts) {
-        //     int c = env->hpa_h.voronoi_map[loc];
-        //     agent_clusters.insert(c);
-        // }
-
-        // int gates_size = env->hpa_h.Gates.size();
-
-        // // Untuk setiap cluster yang ditempat, buat interHT nya
-        // for (int c : agent_clusters){
-        //     for (int g : env->hpa_h.Gates[c]){
-        //         int g_idx = env->hpa_h.AG.gate_index[g];
-        //         if(g_idx == INTERVAL_MAX || env->hpa_h.inter_cache.count(g_idx)) continue;
-
-        //         compute_inter_from(env, g_idx);
-        //     }
-        // }
         int gates_size = env->hpa_h.AG.gates.size();
         for (int g_idx = 0; g_idx < gates_size; g_idx++) {
             if (!env->hpa_h.inter_cache.count(g_idx))
@@ -352,28 +331,21 @@ namespace CustomAlgo{
         // Step 1 : cluster_indexing
         cluster_indexing(env);
 
-        // Step 2a : build_entrances
+        // Step 2 : build_entrances
         build_entrances(env);
-        
-        // Step 2b : build_abstract_graph (1st pass, no highway)
-        build_abstract_graph(env);
-    
-        // Step 2c : build_InterHT (1st pass)
-        build_InterHT(env);
         
         // Step 3 : generateHighways
         generateHighways(env, centroids);
 
     
-        // Step 4a : build_abstract_graph (2nd pass, with highway)
+        // Step 4 : build_abstract_graph 
         build_abstract_graph(env);
         
     
-        // Step 4b : build_InterHT (2nd pass)
+        // Step 5 : build_InterHT
         build_InterHT(env);
      
-        // Step 5 : warmup_inter_cache
-    
+        // Step 6 : warmup_inter_cache
         warmup_inter_cache(env);
   
     }

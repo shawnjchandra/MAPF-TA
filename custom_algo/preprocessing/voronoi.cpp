@@ -111,7 +111,7 @@ namespace CustomAlgo{
         }
 
         
-        while (!q.empty()) {  // FIFO-Based clustering / Multi source BFS
+        while (!q.empty()) {  // Multi source BFS
             int cur = q.front(); 
             q.pop();
             
