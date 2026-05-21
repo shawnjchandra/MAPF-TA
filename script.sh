@@ -45,7 +45,6 @@ do_run() {
     CLUSTERS=$(prompt "Num of clusters (Large Map)"        "400")
     RADIUS=$(prompt   "Radius DBC"              "3")
     PENALTY=$(prompt  "Highway penalty"            "2")
-#    MODE=$(prompt     "Mode (wppl/pibt)"                "wppl")
     WINDOW=$(prompt   "Window"              "10")
     HORIZON=$(prompt  "Horizon"             "1")
     THREADS=$(prompt  "Thread Workers (Cores)"             "2")
