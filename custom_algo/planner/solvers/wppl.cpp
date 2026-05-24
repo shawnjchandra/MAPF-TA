@@ -688,7 +688,7 @@ namespace CustomAlgo {
 
         if (env->curr_timestep > 0 && env->curr_timestep % ps.gcm_freq == 0) {
             for (auto& loc : ps.wait_map) loc.fill(0);
-            reverseHighways(env);
+            // reverseHighways(env);
         }
     }
 }
