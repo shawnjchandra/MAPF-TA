@@ -12,3 +12,5 @@ output/
 
 config.sh
 # tools/
+
+*.csv

@@ -139,6 +139,9 @@ void BaseSystem::simulate(int simulation_time)
 
     vector<Action> all_wait_actions(num_of_agents, Action::NA);
 
+    std::ofstream progress_file("task_progress.csv");
+    progress_file << "timestep,task_finished\n";
+
     for (; simulator.get_curr_timestep() < simulation_time; )
     {
         // find a plan
@@ -187,6 +190,12 @@ void BaseSystem::simulate(int simulation_time)
 
         // update tasks
         task_manager.update_tasks(curr_states, proposed_schedule, simulator.get_curr_timestep());
+
+
+        if (timestep % 100  == 0) {
+            progress_file << timestep << "," << task_manager.num_of_task_finish << "\n";
+            progress_file.flush();
+        }
     }
 }
 
